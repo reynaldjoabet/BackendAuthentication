@@ -1,3 +1,5 @@
+import java.time.LocalDateTime
+import java.time.LocalDate
 import java.time.Instant
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier.BaseVerification
@@ -22,3 +24,8 @@ val verifier = JWT
 val decoded = verifier.verify(jwt)
 val userId = decoded.getSubject
 val userEmail = decoded.getClaim("username").asString()
+
+Instant.now()
+LocalDate.now()
+
+//LocalDateTime.now().toInstant()
