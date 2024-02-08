@@ -17,7 +17,7 @@ val postgresVersion = "42.5.4"
 val doobieVersion = "1.0.0-RC4"
 val logbackVersion = "1.4.7"
 val pureConfigVersion = "0.17.12"
-
+val javaMailVersion = "1.6.2"
 def kamon(artifact: String) = "io.kamon" %% s"kamon-$artifact" % "2.6.1"
 val kamonCore = kamon("core")
 val kamonHttp4s = kamon("http4s-0.23")
@@ -61,7 +61,7 @@ val logback = "ch.qos.logback" % "logback-classic" % logbackVersion
 val skunk = "org.tpolecat" %% "skunk-core" % "1.1.0-M3"
 
 val auth0 = "com.auth0" % "java-jwt" % "4.2.1"
-
+val javaMail = "com.sun.mail" % "javax.mail" % javaMailVersion
 libraryDependencies ++= Seq(
   cirisCore,
   http4sDsl,
@@ -88,5 +88,6 @@ libraryDependencies ++= Seq(
   kamonJaeger,
   prometheusMetrics,
   skunk,
-  auth0
+  auth0,
+  javaMail
 )

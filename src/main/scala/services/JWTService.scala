@@ -1,4 +1,4 @@
-package service
+package services
 import domain._
 import configs._
 import java.time.Instant
@@ -7,10 +7,12 @@ import com.auth0.jwt.JWTVerifier.BaseVerification
 import com.auth0.jwt.algorithms.Algorithm
 import cats.syntax.all._
 import cats.effect.kernel.Sync
-
+import scala.jdk.CollectionConverters._
+//import scala.jdk.javaapi.CollectionConverters._
 trait JWTService[F[_]] {
   def createToken(user: UserJWT): F[UserToken]
   def verifyToken(token: String): F[UserID]
+  def verifyToken1(token: String): F[Option[UserID]]
 }
 
 final class JWTServiceLive[F[_]: Sync](
@@ -38,6 +40,8 @@ final class JWTServiceLive[F[_]: Sync](
         .withExpiresAt(expiration)
         .withSubject(user.id.toString)
         .withClaim(CLAIM_USERNAME, user.email)
+        .withClaim("roles", List("admin").asJava)
+        .withClaim("permission", "api:read")
         .sign(algorithm)
     )
   } yield UserToken(user.email, token, expiration.getEpochSecond)
@@ -51,4 +55,16 @@ final class JWTServiceLive[F[_]: Sync](
       )
     )
   } yield uid
+
+  override def verifyToken1(token: String): F[Option[UserID]] = (for {
+    decoded <- Sync[F].delay(verifier.verify(token))
+    uid <- Sync[F].delay(
+      UserID(
+        id = decoded.getSubject.toLong,
+        email = decoded.getClaim(CLAIM_USERNAME).asString()
+      )
+    )
+  } yield uid)
+    .map(_.some)
+    .recover(_ => None)
 }

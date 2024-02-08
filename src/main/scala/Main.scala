@@ -1,3 +1,4 @@
+import services.JWTServiceLive
 import cats.effect._
 import java.time.Instant
 import com.auth0.jwt.JWT
@@ -5,11 +6,10 @@ import com.auth0.jwt.JWTVerifier.BaseVerification
 import com.auth0.jwt.algorithms.Algorithm
 import domain._
 import configs._
-import service._
 
 object Main extends IOApp {
   val algo = Algorithm.HMAC512("secret")
-  val jwt = JWT
+  val jwt: String = JWT
     .create()
     .withIssuer("rockthejvm.com")
     .withIssuedAt(Instant.now())
@@ -36,7 +36,9 @@ object Main extends IOApp {
     service <- IO(new JWTServiceLive[IO](jwtConfig, clock))
     userToken <- service.createToken(UserJWT(1L, "daniel@rockthejvm.com", ""))
     _ <- IO.println(userToken)
-    uid <- service.verifyToken(userToken.token)
+    uid <- service
+      .verifyToken(userToken.token)
+      .recover(_ => UserID(2L, ""))
     _ <- IO.println(uid.toString)
 
   } yield ()
