@@ -60,7 +60,7 @@ val logback = "ch.qos.logback" % "logback-classic" % logbackVersion
 // https://mvnrepository.com/artifact/org.tpolecat/skunk-core
 val skunk = "org.tpolecat" %% "skunk-core" % "1.1.0-M3"
 
-val auth0 = "com.auth0" % "java-jwt" % "4.2.1"
+val auth0 = "com.auth0" % "java-jwt" % "4.2.2"
 val javaMail = "com.sun.mail" % "javax.mail" % javaMailVersion
 libraryDependencies ++= Seq(
   cirisCore,
@@ -92,10 +92,13 @@ libraryDependencies ++= Seq(
   javaMail
 )
 
-scalacOptions +="-target:17"// ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
+scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
 //We can also set the soruce and target compatibility for the Java compiler by configuring the JavaOptions in build.sbt
 
 javaOptions ++= Seq(
-  "-soruce","17","target","17"
+  "-soruce",
+  "17",
+  "target",
+  "17"
 )
