@@ -21,13 +21,13 @@ final class JWTServiceLive[F[_]: Sync](
     jwtConfig: JWTConfig,
     clock: java.time.Clock
 ) extends JWTService[F] {
-val salt     = "salt".getBytes("UTF-8")
+  val salt = "salt".getBytes("UTF-8")
 //A user-chosen password that can be used with password-based encryption
-val keySpec  = new PBEKeySpec("password".toCharArray(), salt, 65536, 256)
+  val keySpec = new PBEKeySpec("password".toCharArray(), salt, 65536, 256)
 //This class represents a factory for secret keys.
 //Secret key factories operate only on secret (symmetric) keys
-val factory  = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
-val bytes    = factory.generateSecret(keySpec).getEncoded
+  val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
+  val bytes = factory.generateSecret(keySpec).getEncoded
   private val ISSUER = "rockthejvm.com"
   private val CLAIM_USERNAME = "username"
   private val algorithm = Algorithm.HMAC512(bytes)
