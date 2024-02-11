@@ -91,3 +91,11 @@ libraryDependencies ++= Seq(
   auth0,
   javaMail
 )
+
+scalacOptions +="-target:17"// ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
+
+//We can also set the soruce and target compatibility for the Java compiler by configuring the JavaOptions in build.sbt
+
+javaOptions ++= Seq(
+  "-soruce","17","target","17"
+)

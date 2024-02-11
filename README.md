@@ -35,3 +35,9 @@ Allow requests from app.example.com (or whatever your SPA's domain is) in the CO
 
 Ensure that your DNS records are correctly configured to point the subdomains (app.example.com and api.example.com) to the appropriate servers or hosting environments. This typically involves creating A or CNAME records in your DNS provider's dashboard.
 
+
+
+`sudo -i -u postgres` to switch to this user
+`psql` to connect to Postgres with user
+`dscl . list /Users` to list all users on mac
+
