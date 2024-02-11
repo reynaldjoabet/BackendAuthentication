@@ -7,7 +7,7 @@ name := "BackendAuthentication"
 version := "1.0"
 
 val http4sVersion = "0.23.16"
-val cirisVersion = "3.1.0"
+val cirisVersion = "3.5.0"
 val circeVersion = "0.14.5"
 val catsEffectVersion = "3.4.8"
 val fs2Version = "3.7.0"
@@ -92,10 +92,13 @@ libraryDependencies ++= Seq(
   javaMail
 )
 
-scalacOptions +="-target:17"// ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
+scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
 //We can also set the soruce and target compatibility for the Java compiler by configuring the JavaOptions in build.sbt
 
 javaOptions ++= Seq(
-  "-soruce","17","target","17"
+  "-soruce",
+  "17",
+  "target",
+  "17"
 )
