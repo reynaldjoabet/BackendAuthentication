@@ -18,7 +18,7 @@ val doobieVersion = "1.0.0-RC4"
 val logbackVersion = "1.4.7"
 val pureConfigVersion = "0.17.12"
 val javaMailVersion = "1.6.2"
-def kamon(artifact: String) = "io.kamon" %% s"kamon-$artifact" % "2.6.1"
+def kamon(artifact: String) = "io.kamon" %% s"kamon-$artifact" % "2.6.6"
 val kamonCore = kamon("core")
 val kamonHttp4s = kamon("http4s-0.23")
 val kamonPrometheus = kamon("prometheus")
@@ -92,10 +92,13 @@ libraryDependencies ++= Seq(
   javaMail
 )
 
-scalacOptions +="-target:17"// ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
+scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
 //We can also set the soruce and target compatibility for the Java compiler by configuring the JavaOptions in build.sbt
 
 javaOptions ++= Seq(
-  "-soruce","17","target","17"
+  "-soruce",
+  "17",
+  "target",
+  "17"
 )
