@@ -1,4 +1,7 @@
 on:
+ # Triggers the workflow on push events but only for the main branch.
+  push:
+    branches: [ main ]
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * 0'
@@ -14,7 +17,7 @@ jobs:
         uses: scala-steward-org/scala-steward-action@v2
         with:
           github-token: ${{ secrets.WORKFLOW_PAT }} #WORKFLOW_PAT,GITHUB_TOKEN
-          author-email: scala-steward[bot]@users.noreply.github.com
-          author-name: scala-steward[bot]
-          branches: main
-          github-repository: 'backendauthentication'
+          #author-email: scala-steward[bot]@users.noreply.github.com
+          #author-name: scala-steward[bot]
+          #branches: main
+          #github-repository: 'backendauthentication' #defaults to the current repository
