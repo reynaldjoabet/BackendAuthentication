@@ -9,7 +9,7 @@ version := "1.0"
 val http4sVersion = "0.23.16"
 val cirisVersion = "3.1.0"
 val circeVersion = "0.14.5"
-val catsEffectVersion = "3.4.8"
+val catsEffectVersion = "3.4.11"
 val fs2Version = "3.7.0"
 val redis4catsVersion = "1.4.3"
 val flywayVersion = "9.21.0"
@@ -94,6 +94,17 @@ libraryDependencies ++= Seq(
 
 scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
+scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
+
+
+scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
+
+
+scalacOptions +="-target:17"// ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
+
+
+
+
 //We can also set the soruce and target compatibility for the Java compiler by configuring the JavaOptions in build.sbt
 
 javaOptions ++= Seq(
@@ -102,3 +113,9 @@ javaOptions ++= Seq(
   "target",
   "17"
 )
+
+
+  "-soruce","17","target","17"
+)
+
+
