@@ -44,12 +44,12 @@ val COOKIE_NAME = ""
 
 def createCookie(sessionId: String): ResponseCookie =
   ResponseCookie(
-    name = COOKIE_NAME,
+    name = COOKIE_NAME /* jwtCookie  */,
     content = sessionId /* jwt cookie */,
     expires = None,
     maxAge = Some(1.hour.toSeconds),
     path = Some("/"),
-    sameSite = Some(SameSite.Strict),
+    sameSite = Some(SameSite.Lax),
     secure = true,
     httpOnly = true,
     // domain = None
