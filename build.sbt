@@ -37,7 +37,11 @@ val flywayVersion = "9.21.2"
 
 val flywayVersion = "9.21.0"
 
+val postgresVersion = "42.7.1"
+
+
 val postgresVersion = "42.5.4"
+
 
 val doobieVersion = "1.0.0-RC4"
 val logbackVersion = "1.4.14"
@@ -126,6 +130,7 @@ scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode o
 
 
 
+
 scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
 
@@ -133,10 +138,6 @@ scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode o
 
 
 scalacOptions +="-target:17"// ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
-
-
-
-
 
 
 
@@ -150,8 +151,6 @@ javaOptions ++= Seq(
 )
 
 
-
   "-soruce","17","target","17"
 )
-
 
