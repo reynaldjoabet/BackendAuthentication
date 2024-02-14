@@ -8,14 +8,32 @@ version := "1.0"
 
 val http4sVersion = "0.23.16"
 val cirisVersion = "3.1.0"
+
 val circeVersion = "0.14.6"
+
+val circeVersion = "0.14.5"
+
+
 val catsEffectVersion = "3.4.8"
+val fs2Version = "3.9.4"
+
+val catsEffectVersion = "3.4.11"
 val fs2Version = "3.7.0"
+
+val redis4catsVersion = "1.5.2"
+
+
 val redis4catsVersion = "1.4.3"
+
 val flywayVersion = "9.21.0"
 val postgresVersion = "42.5.4"
+
 val doobieVersion = "1.0.0-RC4"
+val logbackVersion = "1.4.14"
+
+val doobieVersion = "1.0.0-RC5"
 val logbackVersion = "1.4.7"
+
 val pureConfigVersion = "0.17.12"
 val javaMailVersion = "1.6.2"
 def kamon(artifact: String) = "io.kamon" %% s"kamon-$artifact" % "2.6.1"
@@ -60,7 +78,7 @@ val logback = "ch.qos.logback" % "logback-classic" % logbackVersion
 // https://mvnrepository.com/artifact/org.tpolecat/skunk-core
 val skunk = "org.tpolecat" %% "skunk-core" % "1.1.0-M3"
 
-val auth0 = "com.auth0" % "java-jwt" % "4.2.1"
+val auth0 = "com.auth0" % "java-jwt" % "4.2.2"
 val javaMail = "com.sun.mail" % "javax.mail" % javaMailVersion
 libraryDependencies ++= Seq(
   cirisCore,
@@ -94,6 +112,18 @@ libraryDependencies ++= Seq(
 
 scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
+
+
+scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
+
+
+scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
+
+
+scalacOptions +="-target:17"// ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
+
+
+
 //We can also set the soruce and target compatibility for the Java compiler by configuring the JavaOptions in build.sbt
 
 javaOptions ++= Seq(
@@ -102,3 +132,10 @@ javaOptions ++= Seq(
   "target",
   "17"
 )
+
+
+
+  "-soruce","17","target","17"
+)
+
+
