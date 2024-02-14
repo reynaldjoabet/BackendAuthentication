@@ -128,9 +128,6 @@ libraryDependencies ++= Seq(
 scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
 
-
-
-
 scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
 
@@ -151,6 +148,8 @@ javaOptions ++= Seq(
 )
 
 
+
   "-soruce","17","target","17"
 )
+
 
