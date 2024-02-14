@@ -149,7 +149,10 @@ class UserServiceLive[F[_]: Sync] private (
 
   } yield token
 
+  // endPasswordRecoveryOTP(email: String)
   override def sendPasswdRecoveryToken(email: String): F[Unit] =
+    // get a token from the token Repo
+    // email the token to the email
     tokenRepo.getToken(email).flatMap {
       case None        => Sync[F].unit
       case Some(token) => emailService.sendPasswordRecoveryEmail(email, token)
