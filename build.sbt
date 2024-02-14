@@ -36,7 +36,7 @@ val logbackVersion = "1.4.7"
 
 val pureConfigVersion = "0.17.12"
 val javaMailVersion = "1.6.2"
-def kamon(artifact: String) = "io.kamon" %% s"kamon-$artifact" % "2.6.1"
+def kamon(artifact: String) = "io.kamon" %% s"kamon-$artifact" % "2.6.6"
 val kamonCore = kamon("core")
 val kamonHttp4s = kamon("http4s-0.23")
 val kamonPrometheus = kamon("prometheus")
@@ -124,6 +124,7 @@ scalacOptions +="-target:17"// ensures the Scala compiler generates bytecode opt
 
 
 
+
 //We can also set the soruce and target compatibility for the Java compiler by configuring the JavaOptions in build.sbt
 
 javaOptions ++= Seq(
@@ -137,5 +138,4 @@ javaOptions ++= Seq(
 
   "-soruce","17","target","17"
 )
-
 
