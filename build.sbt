@@ -28,7 +28,11 @@ val redis4catsVersion = "1.5.2"
 
 val redis4catsVersion = "1.4.3"
 
+val flywayVersion = "9.21.2"
+
+
 val flywayVersion = "9.21.0"
+
 val postgresVersion = "42.5.4"
 
 val doobieVersion = "1.0.0-RC4"
@@ -116,6 +120,7 @@ libraryDependencies ++= Seq(
 scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
 
+
 scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
 
@@ -123,6 +128,7 @@ scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode o
 
 
 scalacOptions +="-target:17"// ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
+
 
 
 
@@ -136,6 +142,7 @@ javaOptions ++= Seq(
   "target",
   "17"
 )
+
 
 
   "-soruce","17","target","17"
