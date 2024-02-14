@@ -70,7 +70,7 @@ val logback = "ch.qos.logback" % "logback-classic" % logbackVersion
 // https://mvnrepository.com/artifact/org.tpolecat/skunk-core
 val skunk = "org.tpolecat" %% "skunk-core" % "1.1.0-M3"
 
-val auth0 = "com.auth0" % "java-jwt" % "4.2.1"
+val auth0 = "com.auth0" % "java-jwt" % "4.2.2"
 val javaMail = "com.sun.mail" % "javax.mail" % javaMailVersion
 libraryDependencies ++= Seq(
   cirisCore,
@@ -105,7 +105,6 @@ libraryDependencies ++= Seq(
 scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
 
-
 scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
 
@@ -113,6 +112,7 @@ scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode o
 
 
 scalacOptions +="-target:17"// ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
+
 
 
 
@@ -127,6 +127,7 @@ javaOptions ++= Seq(
   "target",
   "17"
 )
+
 
 
 
