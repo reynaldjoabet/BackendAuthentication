@@ -16,7 +16,11 @@ val fs2Version = "3.9.4"
 val catsEffectVersion = "3.4.11"
 val fs2Version = "3.7.0"
 
+val redis4catsVersion = "1.5.2"
+
+
 val redis4catsVersion = "1.4.3"
+
 val flywayVersion = "9.21.0"
 val postgresVersion = "42.5.4"
 
@@ -119,6 +123,7 @@ scalacOptions +="-target:17"// ensures the Scala compiler generates bytecode opt
 
 
 
+
 //We can also set the soruce and target compatibility for the Java compiler by configuring the JavaOptions in build.sbt
 
 javaOptions ++= Seq(
@@ -129,11 +134,7 @@ javaOptions ++= Seq(
 )
 
 
-
-
   "-soruce","17","target","17"
 )
-
-
 
 
