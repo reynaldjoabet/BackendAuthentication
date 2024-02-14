@@ -7,6 +7,9 @@ name := "BackendAuthentication"
 version := "1.0"
 
 val http4sVersion = "0.23.16"
+
+val cirisVersion = "3.5.0"
+
 val cirisVersion = "3.1.0"
 
 val circeVersion = "0.14.6"
@@ -113,7 +116,6 @@ libraryDependencies ++= Seq(
 scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
 
-
 scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
 
@@ -121,6 +123,7 @@ scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode o
 
 
 scalacOptions +="-target:17"// ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
+
 
 
 
@@ -133,7 +136,6 @@ javaOptions ++= Seq(
   "target",
   "17"
 )
-
 
 
   "-soruce","17","target","17"
