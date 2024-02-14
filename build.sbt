@@ -14,7 +14,7 @@ val fs2Version = "3.7.0"
 val redis4catsVersion = "1.4.3"
 val flywayVersion = "9.21.0"
 val postgresVersion = "42.5.4"
-val doobieVersion = "1.0.0-RC4"
+val doobieVersion = "1.0.0-RC5"
 val logbackVersion = "1.4.7"
 val pureConfigVersion = "0.17.12"
 val javaMailVersion = "1.6.2"
@@ -92,6 +92,7 @@ libraryDependencies ++= Seq(
   javaMail
 )
 
+scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
 scalacOptions += "-target:17" // ensures the Scala compiler generates bytecode optimized for the Java 17 virtual machine
 
@@ -103,6 +104,7 @@ scalacOptions +="-target:17"// ensures the Scala compiler generates bytecode opt
 
 
 
+
 //We can also set the soruce and target compatibility for the Java compiler by configuring the JavaOptions in build.sbt
 
 javaOptions ++= Seq(
@@ -111,6 +113,7 @@ javaOptions ++= Seq(
   "target",
   "17"
 )
+
 
   "-soruce","17","target","17"
 )
