@@ -6,11 +6,12 @@ import com.auth0.jwt.JWTVerifier.BaseVerification
 import com.auth0.jwt.algorithms.Algorithm
 import domain._
 import configs._
+import javax.crypto.spec.PBEKeySpec
+import javax.crypto.SecretKeyFactory
 
 object Main extends IOApp {
-<<<<<<< Updated upstream
+
   val algo = Algorithm.HMAC512("secret")
-=======
   val salt = "salt".getBytes("UTF-8")
   // A user-chosen password that can be used with password-based encryption
   val keySpec = new PBEKeySpec("password".toCharArray(), salt, 65536, 256)
@@ -19,7 +20,16 @@ object Main extends IOApp {
   val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
   val bytes = factory.generateSecret(keySpec).getEncoded
   val algo = Algorithm.HMAC512(bytes)
->>>>>>> Stashed changes
+
+  val salt     = "salt".getBytes("UTF-8")
+  //A user-chosen password that can be used with password-based encryption
+  val keySpec  = new PBEKeySpec("password".toCharArray(), salt, 65536, 256)
+  //This class represents a factory for secret keys.
+  //Secret key factories operate only on secret (symmetric) keys
+  val factory  = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
+  val bytes    = factory.generateSecret(keySpec).getEncoded
+  val algo = Algorithm.HMAC512(bytes)
+
   val jwt: String = JWT
     .create()
     .withIssuer("rockthejvm.com")
