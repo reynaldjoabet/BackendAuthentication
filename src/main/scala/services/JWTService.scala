@@ -31,8 +31,6 @@ final class JWTServiceLive[F[_]: Sync](
   val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
   val bytes = factory.generateSecret(keySpec).getEncoded
 
-
-
   private val ISSUER = "rockthejvm.com"
   private val CLAIM_USERNAME = "username"
   private val algorithm = Algorithm.HMAC512(bytes)

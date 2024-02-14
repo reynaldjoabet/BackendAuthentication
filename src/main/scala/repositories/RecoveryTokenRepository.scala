@@ -35,7 +35,7 @@ class RecoveryTokenRepositoryLive[F[_]: Concurrent](
       sql"""
     SELECT * FROM recovery_tokens WHERE email=$text AND token=$text 
     """
-        .query(text ~ text ~ int8)// A~B produces (A,B)
+        .query(text ~ text ~ int8) // A~B produces (A,B)
         .map { case (email ~ token ~ expiration) =>
           PasswordRecoveryToken(email, token, expiration)
         }
@@ -57,17 +57,17 @@ class RecoveryTokenRepositoryLive[F[_]: Concurrent](
       case None    => generateToken(email)
     }
 
-    import org.typelevel.twiddles.syntax._
+  import org.typelevel.twiddles.syntax._
 
-    val g=text*:toTwiddleOpTwo(text) 
-    
+  val g = text *: toTwiddleOpTwo(text)
+
   private val passwordRecoveryTokenEncoder = (text *: text *: int8)
     .contramap[PasswordRecoveryToken] {
       case PasswordRecoveryToken(email, token, expiration) =>
-        email *: token *: expiration*:EmptyTuple
+        email *: token *: expiration *: EmptyTuple
     }
 
-    //consider using `a *: b *: c` instead of `a ~ b ~ c`
+  // consider using `a *: b *: c` instead of `a ~ b ~ c`
   private val passwordRecoveryTokenDecoder = (text ~ text ~ int8)
     .map { case (email ~ token ~ expiration) =>
       PasswordRecoveryToken(email, token, expiration)
@@ -102,7 +102,7 @@ class RecoveryTokenRepositoryLive[F[_]: Concurrent](
 
       expiration = java.lang.System.currentTimeMillis() + tokenDuration
       preparedQuery <- postgres.use(_.prepare(query))
-      _ <- preparedQuery.unique((email ,token ,expiration))
+      _ <- preparedQuery.unique((email, token, expiration))
     } yield token
   }
 

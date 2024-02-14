@@ -11,7 +11,6 @@ import javax.crypto.SecretKeyFactory
 
 object Main extends IOApp {
 
-
   val algo = Algorithm.HMAC512("secret")
 
   val salt = "salt".getBytes("UTF-8")
@@ -21,9 +20,6 @@ object Main extends IOApp {
   // Secret key factories operate only on secret (symmetric) keys
   val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
   val bytes = factory.generateSecret(keySpec).getEncoded
-
-  
-
 
   val jwt: String = JWT
     .create()
