@@ -31,7 +31,7 @@ trait ReviewRepository[F[_]] {
 //     review: String,
 //     created: Instant,
 //     updated: Instant
-class ReviewRepositoryLive[F[_]: Concurrent](
+class ReviewRepositoryLive[F[_]: Concurrent] private (
     postgres: Resource[F, Session[F]]
 ) extends ReviewRepository[F] {
 
@@ -39,7 +39,7 @@ class ReviewRepositoryLive[F[_]: Concurrent](
     _.toInstant(ZoneOffset.UTC)
   )(LocalDateTime.ofInstant(_, ZoneOffset.UTC))
 
-  val reviewEncoder =
+  val reviewEncoder         =
     (int8 ~ int8 ~ int8 ~ int4 ~ int4 ~ int4 ~ int4 ~ int4 ~ text ~ instantCodec ~ instantCodec).values
       .contramap[Review] {
         case Review(
@@ -158,4 +158,10 @@ INSERT INTO reviews (id,companyId,userId,management,culture,salary,benefits,woul
     postgres.use(_.prepare(query).flatMap(_.unique(id)))
   }
 
+}
+
+object ReviewRepositoryLive {
+  def make[F[_]: Concurrent](
+      postgres: Resource[F, Session[F]]
+  ) = new ReviewRepositoryLive[F](postgres)
 }

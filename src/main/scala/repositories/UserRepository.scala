@@ -27,13 +27,13 @@ class UserRepositoryLive[F[_]: Concurrent](
   private val instantCodec: Codec[Instant] = timestamp.imap(
     _.toInstant(ZoneOffset.UTC)
   )(LocalDateTime.ofInstant(_, ZoneOffset.UTC))
-  val userEncoder = (int8 ~ text ~ text ~ instantCodec ~ instantCodec).values
+  val userEncoder                          = (int8 ~ text ~ text ~ instantCodec ~ instantCodec).values
     .contramap[UserJWT] {
       case UserJWT(id, email, hashedPassword, ctime, mtime) =>
         id ~ email ~ hashedPassword ~ ctime ~ mtime
     }
 
-  val userDecoder = (int8 ~ text ~ text ~ instantCodec ~ instantCodec).map {
+  val userDecoder                                = (int8 ~ text ~ text ~ instantCodec ~ instantCodec).map {
     case (id ~ email ~ hashedPassword ~ ctime ~ mtime) =>
       UserJWT(id, email, hashedPassword, ctime, mtime)
   }

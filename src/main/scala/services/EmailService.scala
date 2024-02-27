@@ -24,8 +24,8 @@ class LiveEmailService[F[_]: MonadCancelThrow] private (
   ): F[Unit] = {
     val messageResource =
       for {
-        prop <- propsResource
-        auth <- authenticatorResource
+        prop    <- propsResource
+        auth    <- authenticatorResource
         session <- createSession(prop, auth)
         message <- createMessage(session)(sender, to, subject, content)
       } yield message
@@ -80,8 +80,7 @@ class LiveEmailService[F[_]: MonadCancelThrow] private (
 
   private val authenticatorResource: Resource[F, Authenticator] = Resource.pure(
     new Authenticator {
-      override protected def getPasswordAuthentication()
-          : PasswordAuthentication =
+      override protected def getPasswordAuthentication(): PasswordAuthentication =
         new PasswordAuthentication(user, pass)
     }
   )

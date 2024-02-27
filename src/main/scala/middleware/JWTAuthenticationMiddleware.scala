@@ -23,7 +23,7 @@ object JWTAuthenticationMiddleware {
           // jwt service, verify should return an option
           // OptionT(jwtService.verifyToken1(token))
           OptionT.liftF(jwtService.verifyToken(token))
-        case _ => OptionT.none[F, UserID]
+        case _                                                                => OptionT.none[F, UserID]
       }
 
   }
@@ -38,7 +38,7 @@ object JWTAuthenticationMiddleware {
           OptionT
             .liftF(jwtService.verifyToken(token))
             .recoverWith(_ => OptionT.none[F, UserID])
-        case _ => OptionT.none[F, UserID]
+        case _                                                                => OptionT.none[F, UserID]
       }
 
   }
@@ -53,17 +53,17 @@ object JWTAuthenticationMiddleware {
           OptionT
             .liftF(jwtService.verifyToken(token))
             .handleErrorWith(_ => OptionT.none[F, UserID])
-        case _ => OptionT.none[F, UserID]
+        case _                                                                => OptionT.none[F, UserID]
       }
 
   }
-  val jwtConfig = JWTConfig(secret = "mysecret", ttl = 864000)
-  val clock = java.time.Clock.systemDefaultZone()
+  val jwtConfig                                 = JWTConfig(secret = "mysecret", ttl = 864000)
+  val clock                                     = java.time.Clock.systemDefaultZone()
   val jwtMiddleware: AuthMiddleware[IO, UserID] = AuthMiddleware(
-    authenticateUser[IO](new JWTServiceLive[IO](jwtConfig, clock))
+    authenticateUser[IO](JWTServiceLive.make(jwtConfig, clock))
   )
 
   val jwtMiddleware2: AuthMiddleware[IO, UserID] = AuthMiddleware(
-    authenticateUser2[IO](new JWTServiceLive[IO](jwtConfig, clock))
+    authenticateUser2[IO](JWTServiceLive.make(jwtConfig, clock))
   )
 }

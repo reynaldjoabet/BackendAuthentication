@@ -29,11 +29,11 @@ trait CompanyRepository[F[_]] {
 //     tags: List[String] = List.empty
 
 import cats.effect.Concurrent
-class CompanyRepositoryLive[F[_]: Concurrent](
+class CompanyRepositoryLive[F[_]: Concurrent] private (
     postgres: Resource[F, Session[F]]
 ) extends CompanyRepository[F] {
 
-  private val companyEncoder: Encoder[Company] =
+  private val companyEncoder: Encoder[Company]  =
     (int8 ~ text ~ text ~ text ~ text.opt ~ text.opt ~ text.opt ~ text.opt ~ _text).values
       .contramap[Company] {
         case Company(
@@ -88,7 +88,7 @@ class CompanyRepositoryLive[F[_]: Concurrent](
           )
       }
 
-  val f = companyUpdateEncoder ~ int8
+  val f                                        = companyUpdateEncoder ~ int8
   private val companyDecoder: Decoder[Company] =
     (int8 ~ text ~ text ~ text ~ text.opt ~ text.opt ~ text.opt ~ text.opt ~ _text)
       .map {
@@ -127,7 +127,7 @@ class CompanyRepositoryLive[F[_]: Concurrent](
       )
     )
   }
-  override def create1(company: Company): F[Unit] = {
+  override def create1(company: Company): F[Unit]   = {
     val command: Command[Company] = sql"""
               INSERT INTO companies(id,slug,name,url,location,country,industry,image,tags) VALUES $companyEncoder
               """".command
@@ -203,4 +203,10 @@ class CompanyRepositoryLive[F[_]: Concurrent](
     postgres.use(_.execute(query))
   }
 
+}
+
+object CompanyRepositoryLive {
+  def make[F[_]: Concurrent](
+      postgres: Resource[F, Session[F]]
+  ) = new CompanyRepositoryLive[F](postgres)
 }

@@ -8,6 +8,8 @@ import javax.crypto.spec.PBEKeySpec
 import java.security.SecureRandom
 import UserService._
 import cats.effect._
+import java.time.Instant
+import configs.JWTConfig
 trait UserService[F[_]] {
   def registerUser(email: String, password: String): F[UserJWT]
   def verifyPassword(email: String, password: String): F[Boolean]
@@ -44,13 +46,13 @@ class UserServiceLive[F[_]: Sync] private (
   override def verifyPassword(email: String, password: String): F[Boolean] =
     for {
       existingUser <- userRepo.getByEmail(email)
-      verified <- existingUser match {
-        case None => Sync[F].pure(false)
-        case Some(user) =>
-          Sync[F]
-            .delay(Hasher.validateHash(password, user.hashedPassword))
-            .handleError(_ => false)
-      }
+      verified     <- existingUser match {
+                        case None       => Sync[F].pure(false)
+                        case Some(user) =>
+                          Sync[F]
+                            .delay(Hasher.validateHash(password, user.hashedPassword))
+                            .handleError(_ => false)
+                      }
     } yield verified
 // override def updatePassword(
 //     email: String,
@@ -83,12 +85,12 @@ class UserServiceLive[F[_]: Sync] private (
       newPassword: String
   ): F[UserJWT] = for {
     existingUser <- userRepo
-      .getByEmail(email)
-      .map(_.get)
-      .orRaise(
-        new RuntimeException(s"Cannot verify the user $email: non existent")
-      )
-    updatedUser <-
+                      .getByEmail(email)
+                      .map(_.get)
+                      .orRaise(
+                        new RuntimeException(s"Cannot verify the user $email: non existent")
+                      )
+    updatedUser  <-
       Sync[F]
         .delay(Hasher.validateHash(oldPassword, existingUser.hashedPassword))
         .ifM(
@@ -109,12 +111,12 @@ class UserServiceLive[F[_]: Sync] private (
 
   override def deleteUser(email: String, password: String): F[UserJWT] = for {
     existingUser <- userRepo
-      .getByEmail(email)
-      .map(_.get)
-      .orRaise(
-        new RuntimeException(s"Cannot verify the user $email: non existent")
-      )
-    updatedUser <-
+                      .getByEmail(email)
+                      .map(_.get)
+                      .orRaise(
+                        new RuntimeException(s"Cannot verify the user $email: non existent")
+                      )
+    updatedUser  <-
       Sync[F]
         .delay(Hasher.validateHash(password, existingUser.hashedPassword))
         .ifM(
@@ -133,12 +135,12 @@ class UserServiceLive[F[_]: Sync] private (
       password: String
   ): F[Option[UserToken]] = for {
     existingUser <- userRepo
-      .getByEmail(email)
-      .map(_.get)
-      .orRaise(
-        new RuntimeException(s"Cannot verify the user $email: non existent")
-      )
-    token <-
+                      .getByEmail(email)
+                      .map(_.get)
+                      .orRaise(
+                        new RuntimeException(s"Cannot verify the user $email: non existent")
+                      )
+    token        <-
       Sync[F]
         .delay(Hasher.validateHash(password, existingUser.hashedPassword))
         .ifM(
@@ -149,7 +151,25 @@ class UserServiceLive[F[_]: Sync] private (
 
   } yield token
 
-  // endPasswordRecoveryOTP(email: String)
+  // // one time use password reset link
+  // def sendPasswordRecoveryOneTimeToken(email: String)= for{
+  //   existingUser <- userRepo
+  //         .getByEmail(email)
+  //         .map(_.get)
+  //         .orRaise(
+  //           new RuntimeException(s"Cannot verify the user $email: non existent")
+  //         )
+  //         //create date  or expiration time stamp
+  //         expiration=Instant.now
+  //         oneTimeToken =(Hasher.generateHash(existingUser.hashedPassword+expiration.toString()+jwtConfig.secret),expiration)
+
+  //       token <-
+  //         Sync[F]
+  //           .delay()
+
+  //     } yield token
+
+  // def verifyPasswordRecoveryOTP(token:String)= ???
   override def sendPasswdRecoveryToken(email: String): F[Unit] =
     // get a token from the token Repo
     // email the token to the email
@@ -164,27 +184,28 @@ class UserServiceLive[F[_]: Sync] private (
       newPassword: String
   ): F[Boolean] = for {
     existingUser <- userRepo
-      .getByEmail(email)
-      .map(_.get)
-      .orRaise(
-        new RuntimeException(s"Cannot verify the user $email: non existent")
-      )
-    result <- tokenRepo
-      .checkToken(email, token)
-      .ifM(
-        userRepo
-          .update(
-            existingUser.copy(hashedPassword = Hasher.generateHash(newPassword))
-          )
-          .map(_.some),
-        (None: Option[UserJWT]).pure
-      )
-      .map(_.isDefined)
+                      .getByEmail(email)
+                      .map(_.get)
+                      .orRaise(
+                        new RuntimeException(s"Cannot verify the user $email: non existent")
+                      )
+    result       <- tokenRepo
+                      .checkToken(email, token)
+                      .ifM(
+                        userRepo
+                          .update(
+                            existingUser.copy(hashedPassword = Hasher.generateHash(newPassword))
+                          )
+                          .map(_.some),
+                        (None: Option[UserJWT]).pure
+                      )
+                      .map(_.isDefined)
 
   } yield result
 
 }
-object UserService {
+object UserService      {
+
   // // HMAC   -- Hash Message Authentication Code 基于散列的消息验证模式
   //  // SHA512 -- Secure Hash Algorithm 512, is a hashing algorithm used to convert text of any length into a fixed-size string.
   //  private val PBKDF2_ALGO: String    = "PBKDF2WithHmacSHA512"
@@ -231,11 +252,11 @@ object UserService {
 
   object Hasher {
 
-    private val PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA512"
+    private val PBKDF2_ALGORITHM  = "PBKDF2WithHmacSHA512"
     private val PBKDF2_ITERATIONS = 1000
-    private val SALT_BYTE_SIZE = 24
-    private val HASH_BYTE_SIZE = 24
-    private val skf = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM)
+    private val SALT_BYTE_SIZE    = 24
+    private val HASH_BYTE_SIZE    = 24
+    private val skf               = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM)
 
     private def pbkdf2(
         message: Array[Char],
@@ -251,7 +272,7 @@ object UserService {
     private def toHex(array: Array[Byte]): String =
       array.map(b => "%02X".format(b)).mkString
 
-    private def fromHex(string: String): Array[Byte] = {
+    private def fromHex(string: String): Array[Byte]                  = {
       string.sliding(2, 2).toArray.map { hexValue =>
         Integer.parseInt(hexValue, 16).toByte
       }
@@ -259,7 +280,7 @@ object UserService {
     // a(i) ^ b(i) for every i
     private def compareBytes(a: Array[Byte], b: Array[Byte]): Boolean = {
       val range = 0 until math.min(a.length, b.length)
-      val diff = range.foldLeft(a.length ^ b.length) { case (acc, i) =>
+      val diff  = range.foldLeft(a.length ^ b.length) { case (acc, i) =>
         acc | (a(i) ^ b(i))
       }
       diff == 0
@@ -277,12 +298,21 @@ object UserService {
 
     def validateHash(string: String, hash: String): Boolean = {
       val hashSegments = hash.split(":")
-      val nIterations = hashSegments(0).toInt
-      val salt = fromHex(hashSegments(1))
-      val validHash = fromHex(hashSegments(2))
-      val testHash =
+      val nIterations  = hashSegments(0).toInt
+      val salt         = fromHex(hashSegments(1))
+      val validHash    = fromHex(hashSegments(2))
+      val testHash     =
         pbkdf2(string.toCharArray, salt, nIterations, HASH_BYTE_SIZE)
       compareBytes(testHash, validHash)
     }
   }
+}
+
+object UserServiceLive {
+  def make[F[_]: Sync](
+      userRepo: UserRepository[F],
+      tokenRepo: RecoveryTokenRepository[F],
+      jwtService: JWTService[F],
+      emailService: EmailService[F]
+  ) = new UserServiceLive[F](userRepo, tokenRepo, jwtService, emailService)
 }

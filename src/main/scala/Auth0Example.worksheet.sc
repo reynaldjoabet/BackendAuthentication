@@ -1,3 +1,4 @@
+import java.util.Locale
 import cats.effect.unsafe.IORuntime
 import cats.data.OptionT
 import cats.effect.IO
@@ -15,7 +16,7 @@ import com.auth0.jwt.algorithms.Algorithm
 import domain.User
 import io.circe.syntax.EncoderOps
 val algo = Algorithm.HMAC512("secret")
-val jwt = JWT
+val jwt  = JWT
   .create()
   .withIssuer("rockthejvm.com")
   .withIssuedAt(Instant.now())
@@ -30,8 +31,8 @@ val verifier = JWT
   .asInstanceOf[BaseVerification]
   .build(java.time.Clock.systemDefaultZone())
 
-val decoded = verifier.verify(jwt)
-val userId = decoded.getSubject
+val decoded   = verifier.verify(jwt)
+val userId    = decoded.getSubject
 val userEmail = decoded.getClaim("username").asString()
 
 Instant.now()
@@ -40,9 +41,9 @@ LocalDate.now()
 //LocalDateTime.now().toInstant()
 
 import scala.concurrent.duration._
-val COOKIE_NAME = ""
+val COOKIE_NAME = "XSESSION"
 
-def createCookie(sessionId: String): ResponseCookie =
+def createCookie(sessionId: String): ResponseCookie         =
   ResponseCookie(
     name = COOKIE_NAME /* jwtCookie  */,
     content = sessionId /* jwt cookie */,
@@ -62,7 +63,7 @@ def createCookie(sessionId: String): ResponseCookie =
 //contains the session token back to the browser
 private def generateSessionToken(token: String): IO[String] =
   Async[IO].delay {
-    val mac = MessageDigest.getInstance("SHA3-512")
+    val mac    = MessageDigest.getInstance("SHA3-512")
     val digest = mac.digest(token.getBytes())
     // a 160-bit (20 byte) random value that is then URL-safe base64-encoded
     // byte[] buffer = new byte[20];
@@ -81,10 +82,55 @@ private def generateSessionToken(token: String): IO[String] =
 OptionT.liftF(IO(Some(3))).value
 
 implicit val ec: IORuntime = IORuntime.global
+generateSessionToken(User(1L, "john900", Set.empty[String]).toString())
+  .unsafeRunSync()
 generateSessionToken(User(1L, "john", Set.empty[String]).toString())
   .unsafeRunSync()
+generateSessionToken(User(1L, "john0", Set.empty[String]).toString())
+  .unsafeRunSync()
+import scala.util.Random
+
+Random.alphanumeric.take(86).mkString.toLowerCase()
+
+scala
+  .util
+  .Random.alphanumeric.take(86).mkString.toLowerCase()
+
+scala
+  .util
+  .Random.alphanumeric.take(86).mkString.toLowerCase()
+Base64.getUrlEncoder().withoutPadding()
+
+Random.alphanumeric.take(86).mkString.toLowerCase(Locale.US)
+
+Random.alphanumeric.take(86).mkString.toLowerCase(Locale.CANADA_FRENCH) //.encodeToString()
+import scala.util.chaining._
+
+// Define a function that computes the SHA3-512 hash digest and then encodes it to Base64
+val sha3_512HashAndEncode: String => String = (input: String) => {
+  // Compute the SHA3-512 hash digest of the input
+  val sha3_512Digest = MessageDigest.getInstance("SHA3-512").digest(input.getBytes("UTF-8"))
+  // Encode the digest to a URL-safe Base64 string without padding
+  Base64.getUrlEncoder.withoutPadding.encodeToString(sha3_512Digest)
+}
+
+val sha3_512HashAndEncode3: String => String = (input: String) => {
+  MessageDigest.getInstance("SHA3-512").digest(input.getBytes("UTF-8"))
+    .pipe(Base64.getUrlEncoder.withoutPadding.encodeToString)
+  // Encode the digest to a URL-safe Base64 string without padding
+
+}
+
+val sha3_512HashAndEncode7: String => String = (input: String) =>
+  MessageDigest.getInstance("SHA3-512").digest(input.getBytes("UTF-8")).pipe(
+    Base64.getUrlEncoder.withoutPadding.encodeToString
+  )
 
 val user = User(1L, "Peter", Set.empty)
+
+sha3_512HashAndEncode7(user.asJson.noSpaces)
+
+sha3_512HashAndEncode7(user.asJson.noSpaces)
 
 user.asJson.spaces2
 
@@ -98,3 +144,36 @@ user.asJson.noSpacesSortKeys
 import io.circe.Decoder
 
 "{\"id\":1,\"roles\":[],\"username\":\"Peter\"}"
+
+val set1 = (1 to 10).toSet
+
+val set2 = (1 to 5).toSet
+//Tests whether a predicate holds for all elements of this $coll.
+set1.forall(set2.contains)
+
+set2.forall(set1.contains)
+
+createCookie(Random.alphanumeric.take(100).mkString)
+
+createCookie(Random.alphanumeric.take(100).mkString)
+
+createCookie(Random.alphanumeric.take(100).mkString)
+
+createCookie(Random.alphanumeric.take(100).mkString)
+
+import cats.syntax.all._
+
+OptionT[IO, Int](IO(Some(3))).value.unsafeRunSync()
+
+OptionT[IO, Int](IO(None)).value.unsafeRunSync()
+
+//OptionT[IO,Int](IO(Some( 8/0))).value.unsafeRunSync()
+
+
+OptionT[IO, Int](IO(Some(1))).flatMap(i=>OptionT[IO, Int](IO(Some(i*485)))).value.unsafeRunSync()
+
+OptionT[IO, Int](IO(Some(3))).flatMap(i=>OptionT[IO, Int](IO(Some(i*485)))).value.unsafeRunSync()
+OptionT[IO, Int](IO(None)).flatMap(i=>OptionT[IO, Int](IO(Some(i*485)))).value.unsafeRunSync()
+
+
+30.minutes.toSeconds

@@ -1,0 +1,35 @@
+version: '3'
+services:
+  my_server:
+    image: liguobin/zim:0.6.3
+    container_name: my_server
+    depends_on:
+      - mysql_server
+      - redis_server
+    ports:
+      - "9000:9000"
+  
+  mysql_server:
+    image: mysql:oracle
+    restart: always
+    container_name: mysql_server
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    # FIXME The MySQL host directory must already exist, change it to your own MySQL location
+    volumes:
+      - /usr/local/mysql/data:/var/lib/mysql
+      - ./my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - MYSQL_DATABASE=trace
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - TZ=Asia/Shanghai
+  
+  redis_server:
+    image: redis
+    container_name: redis_server
+    command: redis-server
+    restart: always
+    ports:
+      - "6379:6379"

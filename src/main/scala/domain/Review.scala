@@ -3,9 +3,9 @@ package domain
 import java.time.Instant
 
 final case class Review(
-    id: Long, // PK
+    id: Long,        // PK
     companyId: Long,
-    userId: Long, // FK
+    userId: Long,    // FK
     management: Int, // 1-5
     culture: Int,
     salary: Int,

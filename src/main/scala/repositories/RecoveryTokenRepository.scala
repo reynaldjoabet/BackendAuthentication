@@ -17,7 +17,7 @@ trait RecoveryTokenRepository[F[_]] {
 
 }
 
-class RecoveryTokenRepositoryLive[F[_]: Concurrent](
+class RecoveryTokenRepositoryLive[F[_]: Concurrent] private (
     postgres: Resource[F, Session[F]],
     recoveryTokenConfig: RecoveryTokenConfig,
     userRepo: UserRepository[F]
@@ -44,8 +44,8 @@ class RecoveryTokenRepositoryLive[F[_]: Concurrent](
       _.prepare(query).flatMap(_.option(email ~ token).map(_.isDefined))
     )
   }
-  private val tokenDuration = recoveryTokenConfig.duration
-  private def randomUppercaseString(len: Int): F[String] = {
+  private val tokenDuration                                         = recoveryTokenConfig.duration
+  private def randomUppercaseString(len: Int): F[String]            = {
     Concurrent[F].pure(
       scala.util.Random.alphanumeric.take(len).mkString.toUpperCase
     )
@@ -68,7 +68,7 @@ class RecoveryTokenRepositoryLive[F[_]: Concurrent](
     }
 
   // consider using `a *: b *: c` instead of `a ~ b ~ c`
-  private val passwordRecoveryTokenDecoder = (text ~ text ~ int8)
+  private val passwordRecoveryTokenDecoder                = (text ~ text ~ int8)
     .map { case (email ~ token ~ expiration) =>
       PasswordRecoveryToken(email, token, expiration)
     }
@@ -95,14 +95,14 @@ class RecoveryTokenRepositoryLive[F[_]: Concurrent](
 
   private def replaceToken(email: String): F[String] = {
     val query = sql"""
-    UPDATE recovery_tokens SET email=$text,token=$text,expiration=$int8
+    UPDATE recovery_tokens SET token=$text,expiration=$int8 WHERE email=$text
     """.query(passwordRecoveryTokenDecoder)
     for {
       token <- randomUppercaseString(8)
 
-      expiration = java.lang.System.currentTimeMillis() + tokenDuration
+      expiration     = java.lang.System.currentTimeMillis() + tokenDuration
       preparedQuery <- postgres.use(_.prepare(query))
-      _ <- preparedQuery.unique((email, token, expiration))
+      _             <- preparedQuery.unique((token, expiration, email))
     } yield token
   }
 
@@ -111,11 +111,19 @@ class RecoveryTokenRepositoryLive[F[_]: Concurrent](
     INSERT INTO recovery_tokens VALUES= $passwordRecoveryTokenEncoder
     """.query(passwordRecoveryTokenDecoder)
     for {
-      token <- randomUppercaseString(8)
-      expiration = java.lang.System.currentTimeMillis() + tokenDuration
+      token         <- randomUppercaseString(8)
+      expiration     = java.lang.System.currentTimeMillis() + tokenDuration
       preparedQuery <- postgres.use(_.prepare(query))
-      _ <- preparedQuery.unique(PasswordRecoveryToken(email, token, expiration))
+      _             <- preparedQuery.unique(PasswordRecoveryToken(email, token, expiration))
     } yield token
 
   }
+}
+
+object RecoveryTokenRepositoryLive {
+  def make[F[_]: Concurrent](
+      postgres: Resource[F, Session[F]],
+      recoveryTokenConfig: RecoveryTokenConfig,
+      userRepo: UserRepository[F]
+  ) = new RecoveryTokenRepositoryLive[F](postgres, recoveryTokenConfig, userRepo)
 }

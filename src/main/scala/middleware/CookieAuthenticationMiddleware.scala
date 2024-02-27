@@ -14,6 +14,8 @@ import cats.MonadError
 import cats.MonadThrow
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers._
+import services._
+import io.circe.Decoder
 object CookieAuthenticationMiddleware {
 
   // Role based authorization checks:
@@ -29,9 +31,9 @@ object CookieAuthenticationMiddleware {
         .map(_.content)
         .collect { case sessionId /* cookie */ =>
           OptionT.liftF(userSessionService.getUserSession(sessionId)).flatMap {
-            case Some(user) if roles.subsetOf(user.roles) =>
+            case Some(user) if roles.forall(user.roles.contains) =>
               OptionT.pure[F](user)
-            case _ => OptionT.none[F, User]
+            case _                                               => OptionT.none[F, User]
           }
         }
         .getOrElse(OptionT.none[F, User])
@@ -69,8 +71,8 @@ object CookieAuthenticationMiddleware {
             .map {
               case Some(user) if roles.subsetOf(user.roles) =>
                 Right[String, User](user)
-              case Some(user) => "Forbidden".asLeft[User]
-              case None       => "Unauthorized".asLeft[User]
+              case Some(user)                               => "Forbidden".asLeft[User]
+              case None                                     => "Unauthorized".asLeft[User]
             }
             .recover { case _ =>
               "Invalid access token".asLeft[User]
@@ -100,9 +102,9 @@ object CookieAuthenticationMiddleware {
             .map {
               case Some(user) if requiredRoles.subsetOf(user.roles) =>
                 Either.right[AuthenticationError, User](user)
-              case Some(user) =>
+              case Some(user)                                       =>
                 Either.left[AuthenticationError, User](ForbiddenResponse)
-              case None =>
+              case None                                             =>
                 Either.left[AuthenticationError, User](UnauthorizedResponse)
             }
             .recover { case _ =>
@@ -133,11 +135,64 @@ object CookieAuthenticationMiddleware {
           OptionT.liftF(cookieRepo.findUserByCookie(cookie)).flatMap {
             case Some(user) if roles.subsetOf(user.roles) =>
               OptionT.pure[F](user)
-            case _ => OptionT.none[F, User]
+            case _                                        => OptionT.none[F, User]
           }
-        case None => OptionT.none[F, User]
+        case None         => OptionT.none[F, User]
       }
   }
+  private def authenticateUser35[F[_]: Monad, T: Decoder](
+      redisService: RedisService[F]
+  ): Kleisli[({ type Y[X] = OptionT[F, X] })#Y, Request[F], T] = Kleisli {
+    req: Request[F] =>
+      req.cookies
+        .find(_.name == "cookiename")
+        .map(_.content) match {
+        case Some(cookie) =>
+          OptionT.liftF(redisService.get[T](cookie)).flatMap {
+            case Some(value) =>
+              OptionT.pure[F](value)
+            case _           => OptionT.none[F, T]
+          }
+        case None         => OptionT.none[F, T]
+      }
+  }
+  private def authenticateUser351[F[_]: Monad, T: Decoder](
+      redisService: RedisService[F]
+  ): Kleisli[({ type Y[X] = OptionT[F, X] })#Y, Request[F], T] = Kleisli {
+    req: Request[F] =>
+      req.cookies
+        .find(_.name == "cookiename")
+        .map(_.content) match {
+        case Some(cookie) =>
+          OptionT(redisService.get[T](cookie)).flatMap(OptionT.pure[F](_))
+        case None         => OptionT.none[F, T]
+      }
+  }
+
+  private def authenticateUser40[F[_]: Monad](
+      jwtService: JWTService[F]
+  ): Kleisli[({ type Y[X] = OptionT[F, X] })#Y, Request[F], UserID] = Kleisli {
+    req: Request[F] =>
+      req.cookies
+        .find(_.name == "cookiename")
+        .map(_.content) match {
+        case Some(cookie) =>
+          OptionT.liftF(jwtService.verifyToken1(cookie)).flatMap {
+            case Some(userId) =>
+              OptionT.pure[F](userId)
+            case _            => OptionT.none[F, UserID]
+          }
+        case None         => OptionT.none[F, UserID]
+      }
+  }
+
+  import domain._
+
+  def authMiddleware35[F[_]: Monad](redisService: RedisService[F]): AuthMiddleware[F, User] =
+    AuthMiddleware(authenticateUser35[F, User](redisService))
+
+  def authMiddleware36[F[_]: Monad, T: Decoder](redisService: RedisService[F]): AuthMiddleware[F, T] =
+    AuthMiddleware(authenticateUser35[F, T](redisService))
 
   def onFailure[F[_]: Monad]: AuthedRoutes[AuthenticationError, F] =
     Kleisli { request =>
@@ -151,7 +206,7 @@ object CookieAuthenticationMiddleware {
               request.context.toString()
             )
           )
-        case ForbiddenResponse =>
+        case ForbiddenResponse    =>
           OptionT.liftF(Forbidden.apply(""))
       }
 
@@ -172,11 +227,12 @@ object CookieAuthenticationMiddleware {
         .map(_.content) match {
         case Some(cookie) =>
           OptionT.liftF(cookieRepo.findUserByCookie(cookie)).flatMap {
-            case Some(user) if requiredScopes.subsetOf(user.scopes) =>
+            case Some(user)
+                if (requiredScopes.forall(user.scopes.contains)) => // requiredScopes.subsetOf(user.scopes) =>
               OptionT.pure[F](user)
             case _ => OptionT.none[F, UserWithScopes]
           }
-        case None => OptionT.none[F, UserWithScopes]
+        case None         => OptionT.none[F, UserWithScopes]
       }
     }
 

@@ -1,8 +1,8 @@
 package domain
-import io.circe.generic.semiauto.deriveEncoder
-import io.circe.Encoder
+import io.circe.generic.semiauto.deriveCodec
+import io.circe.Codec
 case class User(id: Long, username: String, roles: Set[String])
 
 object User {
-  implicit val userEncoder: Encoder[domain.User] = deriveEncoder[User]
+  implicit val userCodec: Codec[User] = deriveCodec[User]
 }

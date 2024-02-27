@@ -3,6 +3,7 @@ import requests._
 import repositories._
 import domain._
 import java.time.Instant
+import cats.effect.kernel.Sync
 trait ReviewService[F[_]] {
 
   def create(req: CreateReviewRequest, userId: Long): F[Review]
@@ -11,7 +12,7 @@ trait ReviewService[F[_]] {
   def getByUserId(userId: Long): F[List[Review]]
 }
 
-class ReviewServiceLive[F[_]] private (repo: ReviewRepository[F])
+class ReviewServiceLive[F[_]] private[services] (repo: ReviewRepository[F])
     extends ReviewService[F] {
   override def create(req: CreateReviewRequest, userId: Long): F[Review] =
     repo.create(
@@ -39,4 +40,7 @@ class ReviewServiceLive[F[_]] private (repo: ReviewRepository[F])
   override def getByUserId(userId: Long): F[List[Review]] =
     repo.getByUserId(userId)
 
+}
+object ReviewService {
+  def make[F[_]: Sync](repo: ReviewRepository[F]) = new ReviewServiceLive[F](repo)
 }

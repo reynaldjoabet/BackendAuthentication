@@ -17,7 +17,7 @@ trait JWTService[F[_]] {
   def verifyToken1(token: String): F[Option[UserID]]
 }
 
-final class JWTServiceLive[F[_]: Sync](
+final class JWTServiceLive[F[_]: Sync] private (
     jwtConfig: JWTConfig,
     clock: java.time.Clock
 ) extends JWTService[F] {
@@ -29,53 +29,61 @@ final class JWTServiceLive[F[_]: Sync](
 //This class represents a factory for secret keys.
 //Secret key factories operate only on secret (symmetric) keys
   val factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1")
-  val bytes = factory.generateSecret(keySpec).getEncoded
+  val bytes   = factory.generateSecret(keySpec).getEncoded
 
-  private val ISSUER = "rockthejvm.com"
+  private val ISSUER         = "rockthejvm.com"
   private val CLAIM_USERNAME = "username"
-  private val algorithm = Algorithm.HMAC512(bytes)
-  private val verifier = JWT
+  private val algorithm      = Algorithm.HMAC512(bytes)
+  private val verifier       = JWT
     .require(algorithm)
     .withIssuer(ISSUER)
     .asInstanceOf[BaseVerification]
     .build(clock)
 
   override def createToken(user: UserJWT): F[UserToken] = for {
-    now <- Sync[F].delay(clock.instant())
+    now        <- Sync[F].delay(clock.instant())
     expiration <- Sync[F].pure(now.plusSeconds(jwtConfig.ttl))
-    token <- Sync[F].delay(
-      JWT
-        .create()
-        .withIssuer(ISSUER)
-        .withIssuedAt(now)
-        .withExpiresAt(expiration)
-        .withSubject(user.id.toString)
-        .withClaim(CLAIM_USERNAME, user.email)
-        .withClaim("roles", List("admin").asJava)
-        .withClaim("permission", "api:read")
-        .sign(algorithm)
-    )
+    token      <- Sync[F].delay(
+                    JWT
+                      .create()
+                      .withIssuer(ISSUER)
+                      .withIssuedAt(now)
+                      .withExpiresAt(expiration)
+                      .withSubject(user.id.toString)
+                      .withClaim(CLAIM_USERNAME, user.email)
+                      .withJWTId("")
+                      .withClaim("roles", List("admin").asJava)
+                      .withClaim("permission", "api:read")
+                      .sign(algorithm)
+                  )
   } yield UserToken(user.email, token, expiration.getEpochSecond)
 
   override def verifyToken(token: String): F[UserID] = for {
     decoded <- Sync[F].delay(verifier.verify(token))
-    uid <- Sync[F].delay(
-      UserID(
-        id = decoded.getSubject.toLong,
-        email = decoded.getClaim(CLAIM_USERNAME).asString()
-      )
-    )
+    uid     <- Sync[F].delay(
+                 UserID(
+                   id = decoded.getSubject.toLong,
+                   email = decoded.getClaim(CLAIM_USERNAME).asString()
+                 )
+               )
   } yield uid
 
   override def verifyToken1(token: String): F[Option[UserID]] = (for {
     decoded <- Sync[F].delay(verifier.verify(token))
-    uid <- Sync[F].delay(
-      UserID(
-        id = decoded.getSubject.toLong,
-        email = decoded.getClaim(CLAIM_USERNAME).asString()
-      )
-    )
+    uid     <- Sync[F].delay(
+                 UserID(
+                   id = decoded.getSubject.toLong,
+                   email = decoded.getClaim(CLAIM_USERNAME).asString()
+                 )
+               )
   } yield uid)
     .map(_.some)
     .recover(_ => None)
+}
+
+object JWTServiceLive {
+  def make[F[_]: Sync](
+      jwtConfig: JWTConfig,
+      clock: java.time.Clock
+  ) = new JWTServiceLive[F](jwtConfig, clock)
 }
