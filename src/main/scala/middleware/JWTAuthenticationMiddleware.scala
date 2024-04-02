@@ -35,8 +35,7 @@ object JWTAuthenticationMiddleware {
       req.headers.get[Authorization] match {
         case Some(Authorization(Credentials.Token(AuthScheme.Bearer, token))) =>
           // jwt service
-          OptionT
-            .liftF(jwtService.verifyToken(token))
+          OptionT.liftF(jwtService.verifyToken(token))
             .recoverWith(_ => OptionT.none[F, UserID])
         case _                                                                => OptionT.none[F, UserID]
       }

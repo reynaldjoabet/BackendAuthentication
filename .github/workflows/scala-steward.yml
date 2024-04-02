@@ -1,23 +1,35 @@
-# on:
-#  # Triggers the workflow on push events but only for the main branch.
-#   push:
-#     branches: [ main ]
-  workflow_dispatch:
-  schedule:
-    - cron: '0 0 * * 0'
+name: Scala Steward
 
-name: Launch Scala Steward
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
 
 jobs:
   scala-steward:
+    name: Scala Steward
     runs-on: ubuntu-22.04
-    name: Launch Scala Steward
+
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: temurin
+          cache: sbt
+      - name: Build project
+        run: sbt compile 
+        
       - name: Launch Scala Steward
         uses: scala-steward-org/scala-steward-action@v2
         with:
-          github-token: ${{ secrets.WORKFLOW_PAT }} #WORKFLOW_PAT,GITHUB_TOKEN
-          author-email: scala-steward[bot]@users.noreply.github.com
-          #author-name: scala-steward[bot]
-          #branches: main
-          #github-repository: 'backendauthentication' #defaults to the current repository
+          author-name: scala-steward
+          author-email: scala-steward[bot]@users.noreply.github.com #scala-steward
+          github-token: ${{ secrets.WORKFLOW_PAT }} #WORKFLOW_PAT,GITHUB_TOKEN #${{ secrets.REPO_GITHUB_TOKEN }}
+          repo-config: .scala-steward.conf
+          ignore-opts-files: false
+          branches: main
+           #github-repository: 'backendauthentication' #defaults to the current repository

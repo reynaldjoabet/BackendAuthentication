@@ -145,13 +145,16 @@ import io.circe.Decoder
 
 "{\"id\":1,\"roles\":[],\"username\":\"Peter\"}"
 
-val set1 = (1 to 10).toSet
+val set1 = (5 to 10).toSet
 
 val set2 = (1 to 5).toSet
 //Tests whether a predicate holds for all elements of this $coll.
 set1.forall(set2.contains)
 
 set2.forall(set1.contains)
+
+
+set1.exists(set2.contains)
 
 createCookie(Random.alphanumeric.take(100).mkString)
 
@@ -177,3 +180,14 @@ OptionT[IO, Int](IO(None)).flatMap(i=>OptionT[IO, Int](IO(Some(i*485)))).value.u
 
 
 30.minutes.toSeconds
+
+
+"2022-02-15T18:35:24.00Z".takeWhile(_ != 'T')
+
+
+val bar = valueOf[23]
+ // bar is 23.type = 23
+
+ //Class[Int]
+
+ "password".getBytes

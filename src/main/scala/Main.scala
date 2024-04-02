@@ -50,7 +50,7 @@ object Main extends IOApp {
     _         <- IO.println(userToken)
     uid       <- service
                    .verifyToken(userToken.token)
-                   .recover(_ => UserID(2L, ""))
+                   .recover(_ => UserID(2L, "",Set.empty[Role]))
     _         <- IO.println(uid.toString)
 
   } yield ()

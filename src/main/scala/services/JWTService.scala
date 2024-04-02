@@ -33,6 +33,7 @@ final class JWTServiceLive[F[_]: Sync] private (
 
   private val ISSUER         = "rockthejvm.com"
   private val CLAIM_USERNAME = "username"
+  private  val CLAIM_ROLES="roles"
   private val algorithm      = Algorithm.HMAC512(bytes)
   private val verifier       = JWT
     .require(algorithm)
@@ -63,7 +64,8 @@ final class JWTServiceLive[F[_]: Sync] private (
     uid     <- Sync[F].delay(
                  UserID(
                    id = decoded.getSubject.toLong,
-                   email = decoded.getClaim(CLAIM_USERNAME).asString()
+                   email = decoded.getClaim(CLAIM_USERNAME).asString(),
+                   roles=decoded.getClaim(CLAIM_ROLES).asList(classOf[Role]).asScala.toSet
                  )
                )
   } yield uid
@@ -73,7 +75,8 @@ final class JWTServiceLive[F[_]: Sync] private (
     uid     <- Sync[F].delay(
                  UserID(
                    id = decoded.getSubject.toLong,
-                   email = decoded.getClaim(CLAIM_USERNAME).asString()
+                   email = decoded.getClaim(CLAIM_USERNAME).asString(),
+                   roles=decoded.getClaim(CLAIM_ROLES).asList(classOf[Role]).asScala.toSet
                  )
                )
   } yield uid)
