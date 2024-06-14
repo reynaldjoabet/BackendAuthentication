@@ -1,19 +1,21 @@
-import services.JWTServiceLive
-import cats.effect._
 import java.time.Instant
+
+import cats.effect._
+
+import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier.BaseVerification
-import com.auth0.jwt.algorithms.Algorithm
-import domain._
 import configs._
+import domain._
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.SecretKeyFactory
+import services.JWTServiceLive
 
 object Main extends IOApp {
 
   val algo = Algorithm.HMAC512("secret")
 
-  val salt    = "salt".getBytes("UTF-8")
+  val salt = "salt".getBytes("UTF-8")
   // A user-chosen password that can be used with password-based encryption
   val keySpec = new PBEKeySpec("password".toCharArray(), salt, 65536, 256)
   // This class represents a factory for secret keys.
@@ -27,8 +29,7 @@ object Main extends IOApp {
     .withIssuedAt(Instant.now())
     .withExpiresAt(Instant.now().plusSeconds(24 * 60 * 60))
     .withSubject("1") // user identifier
-    .withClaim("username", "daniel@rockthejvm.com")
-    .sign(algo)
+    .withClaim("username", "daniel@rockthejvm.com").sign(algo)
 
   val verifier = JWT
     .require(algo)
@@ -48,9 +49,7 @@ object Main extends IOApp {
     service   <- IO(JWTServiceLive.make[IO](jwtConfig, clock))
     userToken <- service.createToken(UserJWT(1L, "daniel@rockthejvm.com", ""))
     _         <- IO.println(userToken)
-    uid       <- service
-                   .verifyToken(userToken.token)
-                   .recover(_ => UserID(2L, "",Set.empty[Role]))
+    uid       <- service.verifyToken(userToken.token).recover(_ => UserID(2L, "", Set.empty[Role]))
     _         <- IO.println(uid.toString)
 
   } yield ()

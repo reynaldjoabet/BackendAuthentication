@@ -1,16 +1,20 @@
 package repositories
-import domain._
-//import skunk.data.Type
-import skunk.data.Arr
+
 import cats.effect._
+import cats.syntax.all._
+
+import domain._
+import doobie.util.pos
 import skunk._
-import skunk.syntax.all._
 //import skunk.implicits._
 import skunk.codec.all._
-import cats.syntax.all._
-import doobie.util.pos
+//import skunk.data.Type
+import skunk.data.Arr
+import skunk.syntax.all._
+
 //import natchez.Trace.Implicits.noop
 trait CompanyRepository[F[_]] {
+
   def create(company: Company): F[Company]
   def create1(company: Company): F[Unit]
   def update(id: Long, company: Company): F[Company]
@@ -18,6 +22,7 @@ trait CompanyRepository[F[_]] {
   def getById(id: Long): F[Option[Company]]
   def getBySlug(slug: String): F[Option[Company]]
   def getAll: F[List[Company]]
+
 }
 // slug: String,
 //     name: String,
@@ -29,12 +34,14 @@ trait CompanyRepository[F[_]] {
 //     tags: List[String] = List.empty
 
 import cats.effect.Concurrent
+
 class CompanyRepositoryLive[F[_]: Concurrent] private (
-    postgres: Resource[F, Session[F]]
+  postgres: Resource[F, Session[F]]
 ) extends CompanyRepository[F] {
 
-  private val companyEncoder: Encoder[Company]  =
-    (int8 ~ text ~ text ~ text ~ text.opt ~ text.opt ~ text.opt ~ text.opt ~ _text).values
+  private val companyEncoder: Encoder[Company] =
+    (int8 ~ text ~ text ~ text ~ text.opt ~ text.opt ~ text.opt ~ text.opt ~ _text)
+      .values
       .contramap[Company] {
         case Company(
               id,
@@ -51,8 +58,10 @@ class CompanyRepositoryLive[F[_]: Concurrent] private (
             tags: _*
           )
       }
+
   private val companyEncoder2: Encoder[Company] =
-    (text ~ text ~ text ~ text.opt ~ text.opt ~ text.opt ~ text.opt ~ _text ~ int8).values
+    (text ~ text ~ text ~ text.opt ~ text.opt ~ text.opt ~ text.opt ~ _text ~ int8)
+      .values
       .contramap[Company] {
         case Company(
               id,
@@ -71,7 +80,8 @@ class CompanyRepositoryLive[F[_]: Concurrent] private (
       }
 
   private val companyUpdateEncoder: Encoder[CompanyUpdate] =
-    (text ~ text ~ text ~ text.opt ~ text.opt ~ text.opt ~ text.opt ~ _text).values
+    (text ~ text ~ text ~ text.opt ~ text.opt ~ text.opt ~ text.opt ~ _text)
+      .values
       .contramap[CompanyUpdate] {
         case CompanyUpdate(
               slug,
@@ -88,23 +98,23 @@ class CompanyRepositoryLive[F[_]: Concurrent] private (
           )
       }
 
-  val f                                        = companyUpdateEncoder ~ int8
+  val f = companyUpdateEncoder ~ int8
+
   private val companyDecoder: Decoder[Company] =
-    (int8 ~ text ~ text ~ text ~ text.opt ~ text.opt ~ text.opt ~ text.opt ~ _text)
-      .map {
-        case id ~ slug ~ name ~ url ~ location ~ country ~ industry ~ image ~ tags =>
-          Company(
-            id,
-            slug,
-            name,
-            url,
-            location,
-            country,
-            industry,
-            image,
-            tags.flattenTo(List)
-          )
-      }
+    (int8 ~ text ~ text ~ text ~ text.opt ~ text.opt ~ text.opt ~ text.opt ~ _text).map {
+      case id ~ slug ~ name ~ url ~ location ~ country ~ industry ~ image ~ tags =>
+        Company(
+          id,
+          slug,
+          name,
+          url,
+          location,
+          country,
+          industry,
+          image,
+          tags.flattenTo(List)
+        )
+    }
 
   override def create(company: Company): F[Company] = {
     val query: Query[Company, Company] = sql"""
@@ -122,12 +132,14 @@ class CompanyRepositoryLive[F[_]: Concurrent] private (
     //   )
     // )
     postgres.use(
-      _.prepare(query).flatMap(
-        _.unique(company)
-      )
+      _.prepare(query)
+        .flatMap(
+          _.unique(company)
+        )
     )
   }
-  override def create1(company: Company): F[Unit]   = {
+
+  override def create1(company: Company): F[Unit] = {
     val command: Command[Company] = sql"""
               INSERT INTO companies(id,slug,name,url,location,country,industry,image,tags) VALUES $companyEncoder
               """".command
@@ -159,17 +171,17 @@ class CompanyRepositoryLive[F[_]: Concurrent] private (
 //     industry: Option[String] = None,
 //     image: Option[String] = None,
 //     tags: List[String] = List.empty
-    postgres
-      .use(
-        _.prepare(query)
-          .flatMap(
-            _.unique(
-              company.slug *: company.name *: company.url *: company.location *: company.country *: company.industry *: company.image *: Arr(
-                company.tags: _*
-              ) *: company.id *: EmptyTuple
-            )
+    postgres.use(
+      _.prepare(query)
+        .flatMap(
+          _.unique(
+            company.slug *: company.name *: company.url *: company.location *: company
+              .country *: company.industry *: company.image *: Arr(
+              company.tags: _*
+            ) *: company.id *: EmptyTuple
           )
-      )
+        )
+    )
   }
 
   override def delete(id: Long): F[Company] = {
@@ -206,7 +218,9 @@ class CompanyRepositoryLive[F[_]: Concurrent] private (
 }
 
 object CompanyRepositoryLive {
+
   def make[F[_]: Concurrent](
-      postgres: Resource[F, Session[F]]
+    postgres: Resource[F, Session[F]]
   ) = new CompanyRepositoryLive[F](postgres)
+
 }

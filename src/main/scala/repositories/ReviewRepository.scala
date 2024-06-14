@@ -1,25 +1,29 @@
 package repositories
 
 import java.time.Instant
-import domain._
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 import cats.effect._
-import skunk._
-import skunk.syntax.all._
 //import skunk.implicits._
 import cats.syntax.all._
+
+import domain._
+import skunk._
 import skunk.codec.all._
-import java.time.ZoneOffset
-import java.time.LocalDateTime
+import skunk.syntax.all._
 
 trait ReviewRepository[F[_]] {
+
   def create(review: Review): F[Review]
   def getById(id: Long): F[Option[Review]]
   def getByCompanyId(companyId: Long): F[List[Review]]
   def getByUserId(userId: Long): F[List[Review]]
   def update(id: Long, review: Review): F[Review]
   def delete(id: Long): F[Review]
+
 }
+
 // id: Long, // PK
 //     companyId: Long,
 //     userId: Long, // FK
@@ -32,15 +36,16 @@ trait ReviewRepository[F[_]] {
 //     created: Instant,
 //     updated: Instant
 class ReviewRepositoryLive[F[_]: Concurrent] private (
-    postgres: Resource[F, Session[F]]
+  postgres: Resource[F, Session[F]]
 ) extends ReviewRepository[F] {
 
   private val instantCodec: Codec[Instant] = timestamp.imap(
     _.toInstant(ZoneOffset.UTC)
   )(LocalDateTime.ofInstant(_, ZoneOffset.UTC))
 
-  val reviewEncoder         =
-    (int8 ~ int8 ~ int8 ~ int4 ~ int4 ~ int4 ~ int4 ~ int4 ~ text ~ instantCodec ~ instantCodec).values
+  val reviewEncoder =
+    (int8 ~ int8 ~ int8 ~ int4 ~ int4 ~ int4 ~ int4 ~ int4 ~ text ~ instantCodec ~ instantCodec)
+      .values
       .contramap[Review] {
         case Review(
               id,
@@ -57,6 +62,7 @@ class ReviewRepositoryLive[F[_]: Concurrent] private (
             ) =>
           id ~ companyId ~ userId ~ management ~ culture ~ salary ~ benefits ~ wouldRecommend ~ review ~ created ~ updated
       }
+
   private val reviewDecoder =
     (int8 ~ int8 ~ int8 ~ int4 ~ int4 ~ int4 ~ int4 ~ int4 ~ text ~ instantCodec ~ instantCodec)
       .map {
@@ -142,11 +148,14 @@ INSERT INTO reviews (id,companyId,userId,management,culture,salary,benefits,woul
     """.query(reviewDecoder)
 
     postgres.use(
-      _.prepare(query).flatMap(
-        _.unique(
-          review.companyId *: review.userId *: review.management *: review.culture *: review.salary *: review.benefits *: review.wouldRecommend *: review.review *: review.created *: review.updated *: review.id *: EmptyTuple
+      _.prepare(query)
+        .flatMap(
+          _.unique(
+            review.companyId *: review.userId *: review.management *: review.culture *: review
+              .salary *: review.benefits *: review.wouldRecommend *: review.review *: review
+              .created *: review.updated *: review.id *: EmptyTuple
+          )
         )
-      )
     )
   }
 
@@ -161,7 +170,9 @@ INSERT INTO reviews (id,companyId,userId,management,culture,salary,benefits,woul
 }
 
 object ReviewRepositoryLive {
+
   def make[F[_]: Concurrent](
-      postgres: Resource[F, Session[F]]
+    postgres: Resource[F, Session[F]]
   ) = new ReviewRepositoryLive[F](postgres)
+
 }

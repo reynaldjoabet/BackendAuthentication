@@ -83,3 +83,49 @@ This means that the cookie is not included in cross-site POST requests, for exam
 [bypassing-samesite-restrictions](https://portswigger.net/web-security/csrf/bypassing-samesite-restrictions)
 
 
+Network interface:
+software or hardware between two pieces of equipment  or protocol layers in a computer network
+
+Network interface controller:
+a computer hardware component that connects a computer to a computer network. Also called Network Interface Card, network adapter,LAN adapter or physical network interface
+
+NICs communicate using Internet Protocol(IP)
+NICs are devices for both the :
+1. Data Link Layer(Layer 2)
+2. Physical Layer(Layer 1)
+
+
+For example,  without the Azure Network Interface( virtual NIC) attached to a VM, the VM can't communicate
+
+A VNIC connects the virtual machine or container to the virtual network, allowing it to communicate with other devices on the same network, both within the virtualized environment and outside of it
+
+
+
+MACs are similar to digital signatures, but they do not have the advantage of asymmetric cryptography, because they require the same Private Key for "signing" a message and authenticating the message.
+
+A certificate is a document that associates an identity to a given public key.  Certificates are signed by a third-party entity called a Certificate Authority (CA).
+
+A Digital Certificate contains a public key and is itself signed by another entity. The signature of that entity can itself be verified by another entity and so on. We end up having what we call a certificate chain. Each top entity certifies the public key of the next entity. The most top-level entity is self-signed, which means that his public key is signed by his own private key.
+
+The X.509 is the most used certificate format, and it is shipped either as binary format (DER) or text format (PEM).
+
+The root certificate is the highest level certificate in the chain. it is self-signed and serves as the anchor of trust
+- Add intermediate certificates
+- add the server certificate ( end entity certificate) at the end of the chain
+
+```bash
+-----BEGIN CERTIFICATE-----
+(Your Root Certificate)
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+(Your Intermediate Certificate 1)
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+(Your Intermediate Certificate 2)
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+(Your Server Certificate)
+-----END CERTIFICATE-----
+```
+
+A CSR contains(includes) a signature corresponding to the public key in the CSR, signed by the private key

@@ -45,7 +45,7 @@ val http4sServer       = http4s("ember-server")
 val http4sClient       = http4s("ember-client")
 //val blazeClient= ???
 //val blazeServer= "org.http4s" %% "http4s-blaze-server" % "0.23.15"
-val http4sCirce        = http4s("circe")
+val http4sCirce = http4s("circe")
 
 val doobie_hikari   = "org.tpolecat"  %% "doobie-hikari"   % doobieVersion
 val postgres        = "org.postgresql" % "postgresql"      % postgresVersion
@@ -54,7 +54,7 @@ val doobie          = "org.tpolecat"  %% "doobie-core"     % doobieVersion
 val doobie_postgres = "org.tpolecat"  %% "doobie-postgres" % doobieVersion
 val logback         = "ch.qos.logback" % "logback-classic" % logbackVersion
 // https://mvnrepository.com/artifact/org.tpolecat/skunk-core
-val skunk           = "org.tpolecat"  %% "skunk-core"      % "1.1.0-M3"
+val skunk = "org.tpolecat" %% "skunk-core" % "1.1.0-M3"
 
 val auth0    = "com.auth0"    % "java-jwt"   % "4.2.2"
 val javaMail = "com.sun.mail" % "javax.mail" % javaMailVersion
