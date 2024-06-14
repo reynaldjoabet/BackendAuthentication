@@ -1,15 +1,18 @@
 package repositories
-import domain._
-import cats.effect.kernel
-import skunk.data.Type
+
 import cats.effect._
+import cats.effect.kernel
+import cats.syntax.all._
+
+import configs._
+import domain._
 import skunk._
-import skunk.syntax.all._
 //import skunk.implicits._
 import skunk.codec.all._
-import cats.syntax.all._
-import configs._
+import skunk.data.Type
+import skunk.syntax.all._
 import skunk.tuple3ToHList
+
 trait RecoveryTokenRepository[F[_]] {
 
   def getToken(email: String): F[Option[String]]
@@ -18,10 +21,11 @@ trait RecoveryTokenRepository[F[_]] {
 }
 
 class RecoveryTokenRepositoryLive[F[_]: Concurrent] private (
-    postgres: Resource[F, Session[F]],
-    recoveryTokenConfig: RecoveryTokenConfig,
-    userRepo: UserRepository[F]
+  postgres: Resource[F, Session[F]],
+  recoveryTokenConfig: RecoveryTokenConfig,
+  userRepo: UserRepository[F]
 ) extends RecoveryTokenRepository[F] {
+
   override def getToken(email: String): F[Option[String]] =
     userRepo
       .getByEmail(email)
@@ -34,8 +38,7 @@ class RecoveryTokenRepositoryLive[F[_]: Concurrent] private (
     val query: Query[String *: String *: EmptyTuple, PasswordRecoveryToken] =
       sql"""
     SELECT * FROM recovery_tokens WHERE email=$text AND token=$text 
-    """
-        .query(text ~ text ~ int8) // A~B produces (A,B)
+    """.query(text ~ text ~ int8) // A~B produces (A,B)
         .map { case (email ~ token ~ expiration) =>
           PasswordRecoveryToken(email, token, expiration)
         }
@@ -44,8 +47,10 @@ class RecoveryTokenRepositoryLive[F[_]: Concurrent] private (
       _.prepare(query).flatMap(_.option(email ~ token).map(_.isDefined))
     )
   }
-  private val tokenDuration                                         = recoveryTokenConfig.duration
-  private def randomUppercaseString(len: Int): F[String]            = {
+
+  private val tokenDuration = recoveryTokenConfig.duration
+
+  private def randomUppercaseString(len: Int): F[String] = {
     Concurrent[F].pure(
       scala.util.Random.alphanumeric.take(len).mkString.toUpperCase
     )
@@ -62,16 +67,16 @@ class RecoveryTokenRepositoryLive[F[_]: Concurrent] private (
   val g = text *: toTwiddleOpTwo(text)
 
   private val passwordRecoveryTokenEncoder = (text *: text *: int8)
-    .contramap[PasswordRecoveryToken] {
-      case PasswordRecoveryToken(email, token, expiration) =>
-        email *: token *: expiration *: EmptyTuple
+    .contramap[PasswordRecoveryToken] { case PasswordRecoveryToken(email, token, expiration) =>
+      email *: token *: expiration *: EmptyTuple
     }
 
   // consider using `a *: b *: c` instead of `a ~ b ~ c`
-  private val passwordRecoveryTokenDecoder                = (text ~ text ~ int8)
-    .map { case (email ~ token ~ expiration) =>
+  private val passwordRecoveryTokenDecoder = (text ~ text ~ int8).map {
+    case (email ~ token ~ expiration) =>
       PasswordRecoveryToken(email, token, expiration)
-    }
+  }
+
   private def findToken(email: String): F[Option[String]] = {
     val query = sql"""
     SELECT * FROM recovery_tokens WHERE email= $text
@@ -118,12 +123,15 @@ class RecoveryTokenRepositoryLive[F[_]: Concurrent] private (
     } yield token
 
   }
+
 }
 
 object RecoveryTokenRepositoryLive {
+
   def make[F[_]: Concurrent](
-      postgres: Resource[F, Session[F]],
-      recoveryTokenConfig: RecoveryTokenConfig,
-      userRepo: UserRepository[F]
+    postgres: Resource[F, Session[F]],
+    recoveryTokenConfig: RecoveryTokenConfig,
+    userRepo: UserRepository[F]
   ) = new RecoveryTokenRepositoryLive[F](postgres, recoveryTokenConfig, userRepo)
+
 }

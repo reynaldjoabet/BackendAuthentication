@@ -1,42 +1,48 @@
 package repositories
-import domain._
 
-import skunk.data.Type
-import cats.effect._
-import skunk._
-import skunk.syntax.all._
-//import skunk.implicits._
-import skunk.codec.all._
-import cats.syntax.all._
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
+import cats.effect._
+import cats.syntax.all._
+
+import domain._
+import skunk._
+//import skunk.implicits._
+import skunk.codec.all._
+import skunk.data.Type
+import skunk.syntax.all._
+
 trait UserRepository[F[_]] {
+
   def create(user: UserJWT): F[UserJWT]
   def getById(id: Long): F[Option[UserJWT]]
   def getByEmail(email: String): F[Option[UserJWT]]
   def update(user: UserJWT): F[UserJWT]
   def delete(id: Long): F[UserJWT]
+
 }
 
 class UserRepositoryLive[F[_]: Concurrent](
-    postgres: Resource[F, Session[F]]
+  postgres: Resource[F, Session[F]]
 ) extends UserRepository[F] {
 
   private val instantCodec: Codec[Instant] = timestamp.imap(
     _.toInstant(ZoneOffset.UTC)
   )(LocalDateTime.ofInstant(_, ZoneOffset.UTC))
-  val userEncoder                          = (int8 ~ text ~ text ~ instantCodec ~ instantCodec).values
-    .contramap[UserJWT] {
-      case UserJWT(id, email, hashedPassword, ctime, mtime) =>
-        id ~ email ~ hashedPassword ~ ctime ~ mtime
+
+  val userEncoder = (int8 ~ text ~ text ~ instantCodec ~ instantCodec)
+    .values
+    .contramap[UserJWT] { case UserJWT(id, email, hashedPassword, ctime, mtime) =>
+      id ~ email ~ hashedPassword ~ ctime ~ mtime
     }
 
-  val userDecoder                                = (int8 ~ text ~ text ~ instantCodec ~ instantCodec).map {
+  val userDecoder = (int8 ~ text ~ text ~ instantCodec ~ instantCodec).map {
     case (id ~ email ~ hashedPassword ~ ctime ~ mtime) =>
       UserJWT(id, email, hashedPassword, ctime, mtime)
   }
+
   override def create(user: UserJWT): F[UserJWT] = {
 
     val query: Query[UserJWT, UserJWT] = sql"""
@@ -69,11 +75,12 @@ class UserRepositoryLive[F[_]: Concurrent](
     """.query(userDecoder)
 
     postgres.use(
-      _.prepare(query).flatMap(
-        _.unique(
-          user.email *: user.hashedPassword *: user.ctime *: user.mtime *: user.id *: EmptyTuple
+      _.prepare(query)
+        .flatMap(
+          _.unique(
+            user.email *: user.hashedPassword *: user.ctime *: user.mtime *: user.id *: EmptyTuple
+          )
         )
-      )
     )
   }
 

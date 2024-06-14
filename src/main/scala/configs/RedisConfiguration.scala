@@ -1,11 +1,10 @@
 package configs
 
-object RedisConfiguration {
-  
-}
+object RedisConfiguration {}
+
 case class RedisConfiguration(
-    host: String,
-    port: Int,
-    password:String,
-    database: Int
+  host: String,
+  port: Int,
+  password: String,
+  database: Int
 )

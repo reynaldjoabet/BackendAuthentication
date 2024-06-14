@@ -1,23 +1,30 @@
 package services
-import repositories._
-import domain._
+
+import java.security.SecureRandom
+import java.time.Instant
+
+import cats.effect._
 import cats.syntax.all._
 import cats.Monad
-import javax.crypto.SecretKeyFactory
-import javax.crypto.spec.PBEKeySpec
-import java.security.SecureRandom
-import UserService._
-import cats.effect._
-import java.time.Instant
+
 import configs.JWTConfig
+import domain._
+import javax.crypto.spec.PBEKeySpec
+import javax.crypto.SecretKeyFactory
+import repositories._
+import UserService._
+
 trait UserService[F[_]] {
+
   def registerUser(email: String, password: String): F[UserJWT]
   def verifyPassword(email: String, password: String): F[Boolean]
+
   def updatePassword(
-      email: String,
-      oldPassword: String,
-      newPassword: String
+    email: String,
+    oldPassword: String,
+    newPassword: String
   ): F[UserJWT]
+
   def deleteUser(email: String, password: String): F[UserJWT]
 
   // JWT -- java web token
@@ -25,19 +32,22 @@ trait UserService[F[_]] {
 
   // recovery pasword
   def sendPasswdRecoveryToken(email: String): F[Unit]
+
   def recoverPasswdFromToken(
-      email: String,
-      token: String,
-      newPassword: String
+    email: String,
+    token: String,
+    newPassword: String
   ): F[Boolean]
+
 }
 
 class UserServiceLive[F[_]: Sync] private (
-    userRepo: UserRepository[F],
-    tokenRepo: RecoveryTokenRepository[F],
-    jwtService: JWTService[F],
-    emailService: EmailService[F]
+  userRepo: UserRepository[F],
+  tokenRepo: RecoveryTokenRepository[F],
+  jwtService: JWTService[F],
+  emailService: EmailService[F]
 ) extends UserService[F] {
+
   override def registerUser(email: String, password: String): F[UserJWT] =
     userRepo.create(
       UserJWT(1L, email = email, hashedPassword = Hasher.generateHash(password))
@@ -46,14 +56,15 @@ class UserServiceLive[F[_]: Sync] private (
   override def verifyPassword(email: String, password: String): F[Boolean] =
     for {
       existingUser <- userRepo.getByEmail(email)
-      verified     <- existingUser match {
-                        case None       => Sync[F].pure(false)
-                        case Some(user) =>
-                          Sync[F]
-                            .delay(Hasher.validateHash(password, user.hashedPassword))
-                            .handleError(_ => false)
-                      }
+      verified <- existingUser match {
+                    case None => Sync[F].pure(false)
+                    case Some(user) =>
+                      Sync[F]
+                        .delay(Hasher.validateHash(password, user.hashedPassword))
+                        .handleError(_ => false)
+                  }
     } yield verified
+
 // override def updatePassword(
 //     email: String,
 //     oldPassword: String,
@@ -80,9 +91,9 @@ class UserServiceLive[F[_]: Sync] private (
 //   }).map(_.get)
 //     .orRaise((new RuntimeException(s"Could not update password for $email")))
   override def updatePassword(
-      email: String,
-      oldPassword: String,
-      newPassword: String
+    email: String,
+    oldPassword: String,
+    newPassword: String
   ): F[UserJWT] = for {
     existingUser <- userRepo
                       .getByEmail(email)
@@ -90,21 +101,20 @@ class UserServiceLive[F[_]: Sync] private (
                       .orRaise(
                         new RuntimeException(s"Cannot verify the user $email: non existent")
                       )
-    updatedUser  <-
+    updatedUser <-
       Sync[F]
         .delay(Hasher.validateHash(oldPassword, existingUser.hashedPassword))
         .ifM(
           userRepo
             .update(
-              existingUser
-                .copy(hashedPassword = Hasher.generateHash(newPassword))
+              existingUser.copy(hashedPassword = Hasher.generateHash(newPassword))
             )
             .map(_.some),
           (None: Option[UserJWT]).pure
         )
         .map(_.get)
         .orRaise(
-          (new RuntimeException(s"Could not update password for $email"))
+          new RuntimeException(s"Could not update password for $email")
         )
 
   } yield updatedUser
@@ -116,23 +126,21 @@ class UserServiceLive[F[_]: Sync] private (
                       .orRaise(
                         new RuntimeException(s"Cannot verify the user $email: non existent")
                       )
-    updatedUser  <-
+    updatedUser <-
       Sync[F]
         .delay(Hasher.validateHash(password, existingUser.hashedPassword))
         .ifM(
-          userRepo
-            .delete(existingUser.id)
-            .map(_.some),
+          userRepo.delete(existingUser.id).map(_.some),
           (None: Option[UserJWT]).pure
         )
         .map(_.get)
-        .orRaise((new RuntimeException(s"Could not delete user $email")))
+        .orRaise(new RuntimeException(s"Could not delete user $email"))
 
   } yield updatedUser
 
   override def generateToken(
-      email: String,
-      password: String
+    email: String,
+    password: String
   ): F[Option[UserToken]] = for {
     existingUser <- userRepo
                       .getByEmail(email)
@@ -140,7 +148,7 @@ class UserServiceLive[F[_]: Sync] private (
                       .orRaise(
                         new RuntimeException(s"Cannot verify the user $email: non existent")
                       )
-    token        <-
+    token <-
       Sync[F]
         .delay(Hasher.validateHash(password, existingUser.hashedPassword))
         .ifM(
@@ -173,15 +181,17 @@ class UserServiceLive[F[_]: Sync] private (
   override def sendPasswdRecoveryToken(email: String): F[Unit] =
     // get a token from the token Repo
     // email the token to the email
-    tokenRepo.getToken(email).flatMap {
-      case None        => Sync[F].unit
-      case Some(token) => emailService.sendPasswordRecoveryEmail(email, token)
-    }
+    tokenRepo
+      .getToken(email)
+      .flatMap {
+        case None        => Sync[F].unit
+        case Some(token) => emailService.sendPasswordRecoveryEmail(email, token)
+      }
 
   override def recoverPasswdFromToken(
-      email: String,
-      token: String,
-      newPassword: String
+    email: String,
+    token: String,
+    newPassword: String
   ): F[Boolean] = for {
     existingUser <- userRepo
                       .getByEmail(email)
@@ -189,22 +199,23 @@ class UserServiceLive[F[_]: Sync] private (
                       .orRaise(
                         new RuntimeException(s"Cannot verify the user $email: non existent")
                       )
-    result       <- tokenRepo
-                      .checkToken(email, token)
-                      .ifM(
-                        userRepo
-                          .update(
-                            existingUser.copy(hashedPassword = Hasher.generateHash(newPassword))
-                          )
-                          .map(_.some),
-                        (None: Option[UserJWT]).pure
-                      )
-                      .map(_.isDefined)
+    result <- tokenRepo
+                .checkToken(email, token)
+                .ifM(
+                  userRepo
+                    .update(
+                      existingUser.copy(hashedPassword = Hasher.generateHash(newPassword))
+                    )
+                    .map(_.some),
+                  (None: Option[UserJWT]).pure
+                )
+                .map(_.isDefined)
 
   } yield result
 
 }
-object UserService      {
+
+object UserService {
 
   // // HMAC   -- Hash Message Authentication Code 基于散列的消息验证模式
   //  // SHA512 -- Secure Hash Algorithm 512, is a hashing algorithm used to convert text of any length into a fixed-size string.
@@ -259,10 +270,10 @@ object UserService      {
     private val skf               = SecretKeyFactory.getInstance(PBKDF2_ALGORITHM)
 
     private def pbkdf2(
-        message: Array[Char],
-        salt: Array[Byte],
-        iterations: Int,
-        nBytes: Int
+      message: Array[Char],
+      salt: Array[Byte],
+      iterations: Int,
+      nBytes: Int
     ): Array[Byte] = {
       val keySpec: PBEKeySpec =
         new PBEKeySpec(message, salt, iterations, nBytes * 8)
@@ -272,15 +283,19 @@ object UserService      {
     private def toHex(array: Array[Byte]): String =
       array.map(b => "%02X".format(b)).mkString
 
-    private def fromHex(string: String): Array[Byte]                  = {
-      string.sliding(2, 2).toArray.map { hexValue =>
-        Integer.parseInt(hexValue, 16).toByte
-      }
+    private def fromHex(string: String): Array[Byte] = {
+      string
+        .sliding(2, 2)
+        .toArray
+        .map { hexValue =>
+          Integer.parseInt(hexValue, 16).toByte
+        }
     }
+
     // a(i) ^ b(i) for every i
     private def compareBytes(a: Array[Byte], b: Array[Byte]): Boolean = {
       val range = 0 until math.min(a.length, b.length)
-      val diff  = range.foldLeft(a.length ^ b.length) { case (acc, i) =>
+      val diff = range.foldLeft(a.length ^ b.length) { case (acc, i) =>
         acc | (a(i) ^ b(i))
       }
       diff == 0
@@ -301,18 +316,21 @@ object UserService      {
       val nIterations  = hashSegments(0).toInt
       val salt         = fromHex(hashSegments(1))
       val validHash    = fromHex(hashSegments(2))
-      val testHash     =
+      val testHash =
         pbkdf2(string.toCharArray, salt, nIterations, HASH_BYTE_SIZE)
       compareBytes(testHash, validHash)
     }
+
   }
 }
 
 object UserServiceLive {
+
   def make[F[_]: Sync](
-      userRepo: UserRepository[F],
-      tokenRepo: RecoveryTokenRepository[F],
-      jwtService: JWTService[F],
-      emailService: EmailService[F]
+    userRepo: UserRepository[F],
+    tokenRepo: RecoveryTokenRepository[F],
+    jwtService: JWTService[F],
+    emailService: EmailService[F]
   ) = new UserServiceLive[F](userRepo, tokenRepo, jwtService, emailService)
+
 }

@@ -1,19 +1,21 @@
 package middleware
 
-import org.http4s.AuthedRoutes
 import cats._
 import cats.data._
+
+import org.http4s._
 import org.http4s.dsl.Http4sDsl
 import org.http4s.headers._
-import org.http4s._
+import org.http4s.AuthedRoutes
 
 object CheckPermissionsMiddleware {
 
-sealed abstract class AuthenticationError
+  sealed abstract class AuthenticationError
 
-case object UnauthorizedResponse extends AuthenticationError
+  case object UnauthorizedResponse extends AuthenticationError
 
-case object ForbiddenResponse extends AuthenticationError
+  case object ForbiddenResponse extends AuthenticationError
+
   def onFailure[F[_]: Monad]: AuthedRoutes[AuthenticationError, F] =
     Kleisli { request =>
       val dsl = Http4sDsl[F]
@@ -26,9 +28,10 @@ case object ForbiddenResponse extends AuthenticationError
               request.context.toString()
             )
           )
-        case ForbiddenResponse    =>
+        case ForbiddenResponse =>
           OptionT.liftF(Forbidden.apply(""))
       }
 
     }
+
 }
