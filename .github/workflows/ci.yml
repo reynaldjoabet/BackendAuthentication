@@ -1,4 +1,4 @@
-name: Scala Steward
+name: Scala CI
 
 on:
  schedule:
@@ -25,9 +25,9 @@ jobs:
           distribution: ${{ matrix.distribution }}
           java-version: ${{ matrix.java }}
           cache: sbt
-          cache-dependency-path: | # optional
-             sub-project/build.sbt
-             sub-project/project/build.properties
+          # cache-dependency-path: | # optional
+          #    ./build.sbt
+          #    ./project/build.properties
       - name: Build project
         run: sbt compile 
 
