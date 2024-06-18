@@ -1,24 +1,26 @@
 // The simplest possible sbt build file is just one line:
 
-scalaVersion := "2.13.12"
+scalaVersion := "2.13.14"
 
 name := "BackendAuthentication"
 
 version := "1.0"
 
-val http4sVersion = "0.23.25"
+val http4sVersion = "0.23.27"
 
-val cirisVersion = "3.5.0"
+val cirisVersion = "3.6.0"
 
-val circeVersion = "0.14.6"
+val circeVersion = "0.14.8"
 
-val catsEffectVersion = "3.4.8"
+val catsEffectVersion = "3.4.11"
 val fs2Version        = "3.9.4"
 val redis4catsVersion = "1.7.0"
 val flywayVersion     = "9.21.2"
 val postgresVersion   = "42.7.1"
 val doobieVersion     = "1.0.0-RC4"
+
 val logbackVersion    = "1.4.14"
+
 val pureConfigVersion = "0.17.12"
 val javaMailVersion   = "1.6.2"
 
@@ -30,7 +32,7 @@ def ciris(artifact: String): ModuleID = "is.cir" %% artifact % cirisVersion
 def http4s(artifact: String): ModuleID =
   "org.http4s" %% s"http4s-$artifact" % http4sVersion
 
-val prometheusMetrics = "org.http4s" %% "http4s-prometheus-metrics" % "0.24.6"
+val prometheusMetrics = "org.http4s" %% "http4s-prometheus-metrics" % "0.24.7"
 
 val circeGenericExtras = circe("generic-extras")
 val circeCore          = circe("core")

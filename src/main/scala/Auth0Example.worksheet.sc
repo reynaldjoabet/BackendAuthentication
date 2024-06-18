@@ -116,7 +116,7 @@ val sha3_512HashAndEncode3: String => String = (input: String) =>
     .getInstance("SHA3-512")
     .digest(input.getBytes("UTF-8"))
     .pipe(Base64.getUrlEncoder.withoutPadding.encodeToString)
-  // Encode the digest to a URL-safe Base64 string without padding
+// Encode the digest to a URL-safe Base64 string without padding
 
 val sha3_512HashAndEncode7: String => String = (input: String) =>
   MessageDigest
