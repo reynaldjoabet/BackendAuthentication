@@ -1,6 +1,6 @@
 // The simplest possible sbt build file is just one line:
 
-scalaVersion := "2.13.14"
+scalaVersion := "2.13.13"
 
 name := "BackendAuthentication"
 
