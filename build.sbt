@@ -100,3 +100,5 @@ libraryDependencies ++= Seq(
 // )
 
 ThisBuild / semanticdbEnabled := true
+
+ThisBuild/ usePipelining := true
