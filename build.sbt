@@ -1,6 +1,6 @@
 // The simplest possible sbt build file is just one line:
 
-scalaVersion := "2.13.12"
+scalaVersion := "2.13.14"
 
 name := "BackendAuthentication"
 
@@ -101,4 +101,4 @@ libraryDependencies ++= Seq(
 
 ThisBuild / semanticdbEnabled := true
 
-ThisBuild/ usePipelining := true
+ThisBuild / usePipelining := true
