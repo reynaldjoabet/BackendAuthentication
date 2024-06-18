@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        distribution: [ 'zulu', 'temurin' ]
-        java: [ '17', '11' ]
+        distribution: ['zulu', 'temurin','corretto']
+        java: ['17', '11']
     name: Java ${{ matrix.Java }} (${{ matrix.distribution }})    
     steps:
       - name: Check out repository
