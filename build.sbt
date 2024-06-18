@@ -1,6 +1,6 @@
 // The simplest possible sbt build file is just one line:
 
-scalaVersion := "2.13.12"
+scalaVersion := "2.13.14"
 
 name := "BackendAuthentication"
 
@@ -12,13 +12,15 @@ val cirisVersion = "3.5.0"
 
 val circeVersion = "0.14.6"
 
-val catsEffectVersion = "3.4.8"
+val catsEffectVersion = "3.4.11"
 val fs2Version        = "3.9.4"
 val redis4catsVersion = "1.5.2"
 val flywayVersion     = "9.21.2"
 val postgresVersion   = "42.7.3"
 val doobieVersion     = "1.0.0-RC4"
+
 val logbackVersion    = "1.4.14"
+
 val pureConfigVersion = "0.17.12"
 val javaMailVersion   = "1.6.2"
 
