@@ -6,7 +6,7 @@ name := "BackendAuthentication"
 
 version := "1.0"
 
-val http4sVersion = "0.23.25"
+val http4sVersion = "0.23.27"
 
 val cirisVersion = "3.5.0"
 
@@ -101,4 +101,4 @@ libraryDependencies ++= Seq(
 
 ThisBuild / semanticdbEnabled := true
 
-ThisBuild/ usePipelining := true
+ThisBuild / usePipelining := true
