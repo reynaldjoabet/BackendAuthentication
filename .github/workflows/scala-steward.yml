@@ -23,6 +23,7 @@ jobs:
           github-token: ${{ secrets.WORKFLOW_PAT }} #WORKFLOW_PAT,GITHUB_TOKEN #${{ secrets.REPO_GITHUB_TOKEN }}
           repo-config: .scala-steward.conf
           ignore-opts-files: false
+          repos-file: 'repos.md'
           branches: main
            #github-repository: 'backendauthentication' #defaults to the current repository
           # A Markdown file with a literal Markdown list of repositories
