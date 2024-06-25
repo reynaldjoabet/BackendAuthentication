@@ -15,7 +15,7 @@ val circeVersion = "0.14.8"
 val catsEffectVersion = "3.5.4"
 val fs2Version        = "3.10.2"
 val redis4catsVersion = "1.7.0"
-val flywayVersion     = "9.21.2"
+val flywayVersion     = "9.22.3"
 val postgresVersion   = "42.7.3"
 val doobieVersion     = "1.0.0-RC4"
 
