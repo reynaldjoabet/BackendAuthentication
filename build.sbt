@@ -10,7 +10,7 @@ val http4sVersion = "0.23.27"
 
 val cirisVersion = "3.6.0"
 
-val circeVersion = "0.14.8"
+val circeVersion = "0.14.9"
 
 val catsEffectVersion = "3.5.4"
 val fs2Version        = "3.10.2"
