@@ -24,6 +24,7 @@ trait CompanyRepository[F[_]] {
   def getAll: F[List[Company]]
 
 }
+
 // slug: String,
 //     name: String,
 //     url: String,
@@ -32,7 +33,6 @@ trait CompanyRepository[F[_]] {
 //     industry: Option[String] = None,
 //     image: Option[String] = None,
 //     tags: List[String] = List.empty
-
 import cats.effect.Concurrent
 
 class CompanyRepositoryLive[F[_]: Concurrent] private (

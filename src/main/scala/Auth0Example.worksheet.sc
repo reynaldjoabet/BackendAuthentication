@@ -42,7 +42,6 @@ Instant.now()
 LocalDate.now()
 
 //LocalDateTime.now().toInstant()
-
 import scala.concurrent.duration._
 val COOKIE_NAME = "XSESSION"
 
