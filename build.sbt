@@ -1,6 +1,6 @@
 // The simplest possible sbt build file is just one line:
 
-ThisBuild / scalaVersion := "2.13.13"
+ThisBuild / scalaVersion := "2.13.14"
 
 name := "BackendAuthentication"
 
@@ -100,6 +100,10 @@ libraryDependencies ++= Seq(
 //   "target",
 //   "17"
 // )
-ThisBuild / semanticdbEnabled := true
+//ThisBuild / semanticdbEnabled := true
+ThisBuild/semanticdbOptions += "-P:semanticdb:synthetics:on" // make sure to add this
+ //ThisBuild/ semanticdbVersion := scalafixSemanticdb.revision
+
+ //scalacOptions ++= Seq("-Yrangepos", "-P:semanticdb:text:on")
 
 ThisBuild / usePipelining := true
